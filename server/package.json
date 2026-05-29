@@ -1,0 +1,24 @@
+{
+  "name": "restaurant-caterer-pwa-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed:menu": "node seeders/menuSeeder.js",
+    "seed:admin": "node seeders/adminSeeder.js"
+  },
+  "dependencies": {
+    "bcryptjs": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "jsonwebtoken": "latest",
+    "mongoose": "latest",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "latest"
+  }
+}

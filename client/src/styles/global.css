@@ -1,0 +1,123 @@
+:root {
+  --primary-color: #15110d;
+  --accent-color: #f4a51c;
+  --accent-soft: #fff1cf;
+  --background-color: #fff8ee;
+  --card-color: #ffffff;
+  --text-color: #221b15;
+  --muted-text: #756f68;
+  --success-color: #16834a;
+  --danger-color: #d14332;
+  --border-color: #ece2d4;
+  --shadow-soft: 0 18px 48px rgba(34, 27, 21, 0.1);
+  --shadow-card: 0 10px 28px rgba(34, 27, 21, 0.08);
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --radius-xl: 28px;
+  --color-primary: var(--primary-color);
+  --color-accent: var(--accent-color);
+  --color-bg: var(--background-color);
+  --color-card: var(--card-color);
+  --color-text: var(--text-color);
+  --color-muted: var(--muted-text);
+  --color-border: var(--border-color);
+  --color-success: var(--success-color);
+  --color-danger: var(--danger-color);
+  font-family: Inter, Poppins, "Nunito Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, Poppins, "Nunito Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--text-color);
+  background: var(--background-color);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.pwa-status-banner {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #b7e4d8;
+  border-radius: 12px;
+  background: #f8fffc;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+  color: #17312d;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 12px;
+}
+
+.pwa-status-banner.offline {
+  border-color: #fecaca;
+  background: #fff7f7;
+  color: #991b1b;
+}
+
+.pwa-status-banner button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: #0f766e;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 0 14px;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+span,
+strong,
+small,
+label,
+button,
+a {
+  overflow-wrap: anywhere;
+}
+
+main {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}

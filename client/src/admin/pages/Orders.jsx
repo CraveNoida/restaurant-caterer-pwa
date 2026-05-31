@@ -4,6 +4,8 @@ import { AdminPageState, StatusBadge, dateTime, money, orderStatuses } from "./a
 import ConfirmationModal from "../components/ConfirmationModal.jsx";
 import AdminToast from "../components/AdminToast.jsx";
 import { joinOrderTracking } from "../../services/socketService.js";
+import { LiveTrackingMap } from "../../components/maps/index.js";
+import { googleMapsUrl } from "../../utils/mapUtils.js";
 
 const nextStatus = {
   placed: "accepted",
@@ -106,10 +108,10 @@ export default function Orders() {
   const state = <AdminPageState loading={loading} error={error} empty={!filtered.length} emptyText="No orders match your filters." />;
   if (loading || error) return state;
   const selectedLocation = selectedTracking?.deliveryLocation || selected?.deliveryLocation;
+  const selectedCustomerLocation = selected?.customerLocation;
   const selectedTrackingInfo = selectedTracking?.deliveryTracking || selected?.deliveryTracking || {};
-  const selectedLocationUrl = selectedLocation?.lat && selectedLocation?.lng
-    ? `https://www.google.com/maps/search/?api=1&query=${selectedLocation.lat},${selectedLocation.lng}`
-    : "";
+  const selectedLocationUrl = googleMapsUrl(selectedLocation);
+  const selectedCustomerLocationUrl = googleMapsUrl(selectedCustomerLocation);
 
   return (
     <section className="admin-page">
@@ -158,7 +160,19 @@ export default function Orders() {
               {!socketOnline && <small>Realtime connection reconnecting</small>}
               {trackingError && <small>{trackingError}</small>}
             </div>
-            {selectedLocationUrl ? <a href={selectedLocationUrl} target="_blank" rel="noreferrer">Open in Google Maps</a> : <span>No map link yet</span>}
+            <LiveTrackingMap
+              className="admin-map-card"
+              customerLocation={selectedCustomerLocation}
+              deliveryLocation={selectedLocation}
+              height={220}
+              subtitle={selectedCustomerLocation || selectedLocation ? "Customer and delivery location" : "No location shared yet"}
+              title="Order tracking map"
+            />
+            <div className="admin-map-actions">
+              {selectedCustomerLocationUrl && <a href={selectedCustomerLocationUrl} target="_blank" rel="noreferrer">Open customer location</a>}
+              {selectedLocationUrl && <a href={selectedLocationUrl} target="_blank" rel="noreferrer">Open delivery location</a>}
+              {!selectedCustomerLocationUrl && !selectedLocationUrl && <span>No map link yet</span>}
+            </div>
           </div>
           <div className="admin-inline-fields">
             <select value={selected.orderStatus} onChange={(event) => updateStatus(selected, event.target.value)}>{orderStatuses.map((item) => <option key={item} value={item}>{item}</option>)}</select>

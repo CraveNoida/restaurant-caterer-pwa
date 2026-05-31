@@ -6,6 +6,8 @@ import { getStatusLabel } from "../../utils/orderUtils.js";
 import DeliveryConfirm from "../components/DeliveryConfirm.jsx";
 import DeliveryToast from "../components/DeliveryToast.jsx";
 import { joinOrderTracking } from "../../services/socketService.js";
+import { LiveTrackingMap } from "../../components/maps/index.js";
+import { formatAccuracy, googleMapsUrl } from "../../utils/mapUtils.js";
 
 const statusActions = [
   ["picked_up", "Picked up"],
@@ -200,12 +202,11 @@ export default function DeliveryOrderDetails() {
   if (loading) return <section className="delivery-state">Loading order...</section>;
   if (error || !order) return <section className="delivery-state error">{error || "Order not found."}</section>;
 
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address || "")}`;
+  const customerLocation = order.customerLocation;
+  const mapsUrl = googleMapsUrl(customerLocation) || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address || "")}`;
   const liveLocation = tracking?.deliveryLocation || order.deliveryLocation;
   const trackingInfo = tracking?.deliveryTracking || order.deliveryTracking || {};
-  const deliveryMapsUrl = liveLocation?.lat && liveLocation?.lng
-    ? `https://www.google.com/maps/search/?api=1&query=${liveLocation.lat},${liveLocation.lng}`
-    : "";
+  const deliveryMapsUrl = googleMapsUrl(liveLocation);
   const phone = order.phone;
 
   return (
@@ -234,11 +235,19 @@ export default function DeliveryOrderDetails() {
         </div>
         <p>{formatLastUpdated(liveLocation?.updatedAt || trackingInfo.lastUpdatedAt)}</p>
         <p>GPS connection: {socketState === "online" ? "Realtime connected" : "Waiting to reconnect"}</p>
-        {liveLocation?.accuracy && <p>Accuracy: about {Math.round(liveLocation.accuracy)} m</p>}
+        {liveLocation?.accuracy && <p>{formatAccuracy(liveLocation)}</p>}
         {trackingError && <p className="delivery-error-text">{trackingError}</p>}
+        <LiveTrackingMap
+          className="delivery-map-card"
+          customerLocation={customerLocation}
+          deliveryLocation={liveLocation}
+          subtitle={customerLocation ? "Customer pin and your live location" : "Customer GPS pin not shared"}
+          title="Delivery route map"
+        />
         <div className="delivery-tracking-actions">
           <button type="button" className="start" onClick={startLiveTracking} disabled={trackingInfo.isLive && watchIdRef.current !== null}>Start Live Tracking</button>
           <button type="button" className="stop" onClick={stopLiveTracking} disabled={!trackingInfo.isLive && watchIdRef.current === null}>Stop Live Tracking</button>
+          {customerLocation && <a href={mapsUrl} target="_blank" rel="noreferrer">Open Customer Location</a>}
           {deliveryMapsUrl && <a href={deliveryMapsUrl} target="_blank" rel="noreferrer">Open Delivery Location</a>}
         </div>
       </section>

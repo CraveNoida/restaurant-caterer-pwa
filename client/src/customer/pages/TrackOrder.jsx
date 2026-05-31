@@ -7,6 +7,8 @@ import { PHONE_NUMBER, WHATSAPP_NUMBER } from "../components/homeData.js";
 import { useEffect, useState } from "react";
 import { orderService } from "../../services/orderService.js";
 import { joinOrderTracking } from "../../services/socketService.js";
+import { LiveTrackingMap } from "../../components/maps/index.js";
+import { formatAccuracy, googleMapsUrl } from "../../utils/mapUtils.js";
 
 const timeline = [
   ["placed", "Order Placed", CheckCircle2],
@@ -100,10 +102,10 @@ export default function TrackOrder() {
 
   const activeIndex = Math.max(0, timeline.findIndex(([status]) => status === normalizeStatus(order.status)));
   const liveLocation = tracking?.deliveryLocation || order.deliveryLocation;
+  const customerLocation = order.customerLocation;
   const trackingInfo = tracking?.deliveryTracking || order.deliveryTracking || {};
-  const deliveryMapsUrl = liveLocation?.lat && liveLocation?.lng
-    ? `https://www.google.com/maps/search/?api=1&query=${liveLocation.lat},${liveLocation.lng}`
-    : "";
+  const deliveryMapsUrl = googleMapsUrl(liveLocation);
+  const customerMapsUrl = googleMapsUrl(customerLocation);
 
   return (
     <div className="app-screen track-screen">
@@ -127,18 +129,23 @@ export default function TrackOrder() {
 
       <section className="app-card live-location-card">
         <div>
-          <span>Delivery partner location</span>
+          <span>Order map</span>
           <strong>{trackingInfo.isLive ? "Live tracking active" : liveLocation ? "Last known location" : "Waiting for delivery partner"}</strong>
           <p>{formatLastUpdated(liveLocation?.updatedAt || trackingInfo.lastUpdatedAt)}</p>
           {!socketOnline && <small>Realtime connection is reconnecting.</small>}
           {trackingError && <small>{trackingError}</small>}
         </div>
-        <div className={trackingInfo.isLive ? "map-placeholder live" : "map-placeholder"}>
-          <span>Location pin</span>
-          <strong>{liveLocation ? "Delivery nearby" : "Tracking unavailable"}</strong>
-          {liveLocation?.accuracy && <small>Accuracy about {Math.round(liveLocation.accuracy)} m</small>}
+        <LiveTrackingMap
+          customerLocation={customerLocation}
+          deliveryLocation={liveLocation}
+          subtitle={customerLocation || liveLocation ? "Map updates as delivery location changes" : "Waiting for location"}
+          title="Live order tracking"
+        />
+        {liveLocation?.accuracy && <small>{formatAccuracy(liveLocation)}</small>}
+        <div className="map-action-row">
+          {customerMapsUrl && <a className="app-button outline full-width" href={customerMapsUrl} target="_blank" rel="noreferrer">Open customer location in Google Maps</a>}
+          {deliveryMapsUrl && <a className="app-button outline full-width" href={deliveryMapsUrl} target="_blank" rel="noreferrer">Open delivery location in Google Maps</a>}
         </div>
-        {deliveryMapsUrl && <a className="app-button outline full-width" href={deliveryMapsUrl} target="_blank" rel="noreferrer">Open delivery location in Google Maps</a>}
       </section>
 
       <section className="app-card timeline-card premium-timeline">

@@ -37,6 +37,13 @@ const orderSchema = new mongoose.Schema(
     },
     deliveryAddress: { type: String, trim: true },
     landmark: { type: String, trim: true },
+    customerLocation: {
+      lat: Number,
+      lng: Number,
+      accuracy: Number,
+      mapsLink: String,
+      updatedAt: Date
+    },
     paymentMethod: {
       type: String,
       enum: ["COD", "UPI", "Razorpay"],

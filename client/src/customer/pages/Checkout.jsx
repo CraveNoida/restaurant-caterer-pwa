@@ -17,6 +17,8 @@ import { calculateCartTotals } from "../../utils/orderUtils.js";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { paymentService } from "../../services/paymentService.js";
+import { LocationPickerMap } from "../../components/maps/index.js";
+import { formatAccuracy, googleMapsUrl } from "../../utils/mapUtils.js";
 
 function loadRazorpayScript() {
   if (window.Razorpay) return Promise.resolve(true);
@@ -44,6 +46,7 @@ export default function Checkout() {
     email: "",
     address: "",
     landmark: "",
+    deliveryLocation: null,
     fulfillment: "Delivery",
     deliveryTime: "ASAP",
     scheduledTime: "",
@@ -109,12 +112,14 @@ export default function Checkout() {
     setIsDetectingLocation(true);
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
-        const lat = Number(coords.latitude).toFixed(6);
-        const lng = Number(coords.longitude).toFixed(6);
-        const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
-        const accuracy = Number.isFinite(coords.accuracy) ? ` Accuracy: ${Math.round(coords.accuracy)}m.` : "";
+        const deliveryLocation = {
+          lat: coords.latitude,
+          lng: coords.longitude,
+          accuracy: coords.accuracy,
+          mapsLink: googleMapsUrl({ lat: coords.latitude, lng: coords.longitude })
+        };
 
-        updateField("address", `Current location: ${mapsUrl} (${lat}, ${lng}).${accuracy}`);
+        updateField("deliveryLocation", deliveryLocation);
         setErrors((current) => ({ ...current, address: undefined }));
         setIsDetectingLocation(false);
       },
@@ -212,6 +217,7 @@ export default function Checkout() {
           email: form.email.trim(),
           address: form.address.trim(),
           landmark: form.landmark.trim(),
+          deliveryLocation: form.deliveryLocation,
           notes: form.notes.trim(),
           transactionId: form.transactionId.trim(),
           clearCartOnSuccess: !isRazorpay
@@ -316,7 +322,13 @@ export default function Checkout() {
             </div>
             <label>
               Address
-              <textarea required value={form.address} onChange={(event) => updateField("address", event.target.value)} />
+              <small className="field-helper">Please enter complete address. GPS helps our delivery partner find you faster.</small>
+              <textarea
+                required
+                placeholder="House no., building, street, area"
+                value={form.address}
+                onChange={(event) => updateField("address", event.target.value)}
+              />
               {errors.address && <small className="field-error">{errors.address}</small>}
             </label>
             <label>
@@ -331,6 +343,29 @@ export default function Checkout() {
             >
               <MapPin size={17} /> {isDetectingLocation ? "Detecting location..." : "Use current location"}
             </button>
+            {form.deliveryLocation && (
+              <section className="location-detected-card">
+                <div>
+                  <span>Location detected</span>
+                  <strong>{formatAccuracy(form.deliveryLocation)}</strong>
+                </div>
+                <LocationPickerMap
+                  location={form.deliveryLocation}
+                  onChange={(location) => updateField("deliveryLocation", {
+                    ...location,
+                    mapsLink: googleMapsUrl(location)
+                  })}
+                />
+                <div className="map-action-row">
+                  <a className="app-button outline full-width" href={form.deliveryLocation.mapsLink || googleMapsUrl(form.deliveryLocation)} target="_blank" rel="noreferrer">
+                    Open in Google Maps
+                  </a>
+                  <button className="app-button full-width" type="button" onClick={() => setErrors((current) => ({ ...current, address: undefined }))}>
+                    Use this location
+                  </button>
+                </div>
+              </section>
+            )}
           </>
         ) : (
           <div className="saved-address-card">

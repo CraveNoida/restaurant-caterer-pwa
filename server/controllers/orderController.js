@@ -35,6 +35,8 @@ export async function createOrder(req, res, next) {
       totalAmount,
       orderType,
       deliveryAddress,
+      deliveryLocation,
+      customerLocation,
       landmark,
       paymentMethod,
       paymentStatus = "pending",
@@ -53,6 +55,18 @@ export async function createOrder(req, res, next) {
       totalAmount ?? Number(subtotal) + Number(deliveryCharge) + Number(packingCharge) + Number(tax) - Number(discount);
 
     const method = normalizePaymentMethod(paymentMethod);
+    const locationPayload = customerLocation || deliveryLocation;
+    const lat = Number(locationPayload?.lat);
+    const lng = Number(locationPayload?.lng);
+    const normalizedCustomerLocation = Number.isFinite(lat) && Number.isFinite(lng)
+      ? {
+          lat,
+          lng,
+          accuracy: Number.isFinite(Number(locationPayload.accuracy)) ? Number(locationPayload.accuracy) : undefined,
+          mapsLink: locationPayload.mapsLink || `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+          updatedAt: new Date()
+        }
+      : undefined;
     const order = await Order.create({
       orderId: generateOrderId(),
       customerId: req.user._id,
@@ -67,6 +81,7 @@ export async function createOrder(req, res, next) {
       totalAmount: calculatedTotal,
       orderType: normalizeOrderType(orderType),
       deliveryAddress,
+      customerLocation: normalizedCustomerLocation,
       landmark,
       paymentMethod: method,
       paymentStatus,

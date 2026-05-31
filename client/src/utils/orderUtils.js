@@ -121,6 +121,9 @@ export function normalizeOrder(order) {
     orderType,
     address: order.address || order.deliveryAddress || checkout.address || "",
     landmark: order.landmark || checkout.landmark || "",
+    customerLocation: order.customerLocation || checkout.customerLocation || checkout.deliveryLocation || null,
+    deliveryLocation: order.deliveryLocation || null,
+    deliveryTracking: order.deliveryTracking || null,
     paymentMethod: order.paymentMethod === "COD" ? "Cash on Delivery" : order.paymentMethod || checkout.paymentMethod || "Cash on Delivery",
     paymentStatus: order.paymentStatus || "pending",
     transactionId: order.transactionId || order.payment?.transactionId || checkout.transactionId || "",
@@ -139,6 +142,8 @@ export function normalizeOrder(order) {
       email: order.email || checkout.email || "",
       address: order.address || order.deliveryAddress || checkout.address || "",
       landmark: order.landmark || checkout.landmark || "",
+      customerLocation: order.customerLocation || checkout.customerLocation || checkout.deliveryLocation || null,
+      deliveryLocation: checkout.deliveryLocation || order.customerLocation || null,
       paymentMethod: order.paymentMethod || checkout.paymentMethod || "Cash on Delivery",
       fulfillment: orderType === "pickup" ? "Pickup" : "Delivery",
       notes: order.orderNotes || checkout.notes || ""

@@ -150,6 +150,7 @@ export function CartProvider({ children }) {
       totalAmount: orderTotals.grandTotal,
       orderType,
       deliveryAddress: checkoutDetails.address || "",
+      deliveryLocation: checkoutDetails.deliveryLocation,
       landmark: checkoutDetails.landmark || "",
       paymentMethod:
         checkoutDetails.paymentMethod === "Cash on Delivery"

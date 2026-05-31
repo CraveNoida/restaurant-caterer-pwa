@@ -168,9 +168,7 @@ td small {
 }
 
 .admin-tracking-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 12px;
   border: 1px solid #d7f4ea;
   border-radius: 8px;
@@ -201,6 +199,16 @@ td small {
   font-weight: 900;
   padding: 0 10px;
   text-decoration: none;
+}
+
+.admin-map-card {
+  min-width: 0;
+}
+
+.admin-map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .admin-toolbar {

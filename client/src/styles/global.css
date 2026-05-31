@@ -156,6 +156,110 @@ select {
   font: inherit;
 }
 
+.map-card,
+.map-picker,
+.location-detected-card {
+  min-width: 0;
+}
+
+.map-card {
+  display: grid;
+  gap: 10px;
+}
+
+.map-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.map-card-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.map-card-head span,
+.map-card-head strong {
+  min-width: 0;
+}
+
+.map-card-head span {
+  color: var(--muted-text);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.map-card-head strong {
+  color: var(--text-color);
+  font-size: 13px;
+}
+
+.map-card-head a,
+.map-action-row a,
+.map-action-row button,
+.admin-map-actions a {
+  text-decoration: none;
+}
+
+.map-card .leaflet-container,
+.map-picker .leaflet-container {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: #e5e7eb;
+  z-index: 0;
+}
+
+.map-state {
+  display: grid;
+  min-height: 180px;
+  border: 1px dashed #9ca3af;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--muted-text);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 16px;
+  place-items: center;
+  text-align: center;
+}
+
+.map-pin-icon {
+  background: transparent;
+  border: 0;
+}
+
+.map-pin-icon span {
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.24);
+  transform: rotate(-45deg);
+}
+
+.map-action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .map-card-head,
+  .map-action-row {
+    grid-template-columns: 1fr;
+  }
+
+  .map-card-head {
+    align-items: stretch;
+    display: grid;
+  }
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;

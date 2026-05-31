@@ -1344,6 +1344,31 @@ body {
   background: linear-gradient(135deg, #ecfdf5, #f8fafc);
 }
 
+.location-detected-card {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #b7e4d8;
+  border-radius: 14px;
+  background: #f8fffc;
+  padding: 12px;
+}
+
+.location-detected-card > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.location-detected-card span,
+.field-helper {
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.location-detected-card strong {
+  color: var(--app-text);
+}
+
 .order-type-card {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;

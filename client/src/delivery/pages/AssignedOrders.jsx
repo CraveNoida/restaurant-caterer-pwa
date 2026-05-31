@@ -19,7 +19,11 @@ export default function AssignedOrders() {
 
   return (
     <section className="delivery-page">
-      <h1>Assigned Orders</h1>
+      <div className="delivery-page-title">
+        <span>Delivery queue</span>
+        <h1>Assigned Orders</h1>
+        <p>{orders.length} active order{orders.length === 1 ? "" : "s"} ready for action.</p>
+      </div>
       <div className="delivery-list">
         {orders.length ? orders.map((order) => <DeliveryOrderCard key={order.orderId} order={order} />) : <div className="delivery-state">No assigned orders right now.</div>}
       </div>

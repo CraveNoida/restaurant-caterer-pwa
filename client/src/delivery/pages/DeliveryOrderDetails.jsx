@@ -213,19 +213,25 @@ export default function DeliveryOrderDetails() {
     <section className="delivery-page">
       <DeliveryToast toast={toast} onClose={() => setToast(null)} />
       <Link className="delivery-back-link" to="/delivery/orders">Back to orders</Link>
-      <article className="delivery-detail-card">
-        <span>{order.orderId}</span>
-        <h1>{order.customerName}</h1>
-        {order.houseDetails && <small>House / Flat / Floor: {order.houseDetails}</small>}
-        <p>{order.address}</p>
-        {order.landmark && <small>Landmark: {order.landmark}</small>}
-        <b>{deliveryStatusLabels[order.deliveryStatus] || getStatusLabel(order.status)}</b>
+      <article className="delivery-detail-card delivery-order-hero">
+        <div>
+          <span>{order.orderId}</span>
+          <h1>{order.customerName}</h1>
+          <p>{deliveryStatusLabels[order.deliveryStatus] || getStatusLabel(order.status)}</p>
+        </div>
+        <b>{formatCurrency(order.totalAmount)}</b>
       </article>
       <div className="delivery-action-grid">
         <a href={`tel:${phone}`}>Call Customer</a>
         <a href={`https://wa.me/91${phone}?text=${encodeURIComponent(`Hi, I am delivering order ${order.orderId}.`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
         <a href={mapsUrl} target="_blank" rel="noreferrer">Open Route in Google Maps</a>
       </div>
+      <section className="delivery-detail-card delivery-address-card">
+        <h2>Customer Address</h2>
+        {order.houseDetails && <small>House / Flat / Floor: {order.houseDetails}</small>}
+        <p>{order.address}</p>
+        {order.landmark && <small>Landmark: {order.landmark}</small>}
+      </section>
       <section className="delivery-detail-card delivery-tracking-card">
         <div className="delivery-tracking-head">
           <div>

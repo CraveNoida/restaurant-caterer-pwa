@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import { getStatusLabel } from "../../utils/orderUtils.js";
+import { googleMapsRouteUrl } from "../../utils/mapUtils.js";
 
 const deliveryStatusLabels = {
   assigned: "Assigned",
@@ -11,6 +12,8 @@ const deliveryStatusLabels = {
 };
 
 export default function DeliveryOrderCard({ order }) {
+  const routeUrl = googleMapsRouteUrl(order.customerLocation) || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address || "")}`;
+
   return (
     <article className="delivery-order-card">
       <div>
@@ -26,6 +29,8 @@ export default function DeliveryOrderCard({ order }) {
       <div className="delivery-card-actions">
         <span className="delivery-status">{deliveryStatusLabels[order.deliveryStatus] || getStatusLabel(order.status)}</span>
         <Link to={`/delivery/orders/${order.orderId}`}>View Details</Link>
+        <a href={routeUrl} target="_blank" rel="noreferrer">Maps</a>
+        {order.phone && <a href={`tel:${order.phone}`}>Call</a>}
       </div>
     </article>
   );

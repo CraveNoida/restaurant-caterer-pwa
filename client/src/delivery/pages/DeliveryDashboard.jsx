@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { deliveryService } from "../../services/deliveryService.js";
 import DeliveryOrderCard from "../components/DeliveryOrderCard.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { CheckCircle2, PackageCheck, ReceiptText, Truck } from "../../customer/components/icons.jsx";
 
 export default function DeliveryDashboard() {
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,15 +32,25 @@ export default function DeliveryDashboard() {
 
   return (
     <section className="delivery-page">
-      <h1>Dashboard</h1>
-      <div className="delivery-stat-grid">
-        <Stat label="Assigned" value={stats.assigned} />
-        <Stat label="Picked up" value={stats.pickedUp} />
-        <Stat label="On the way" value={stats.onTheWay} />
-        <Stat label="Delivered today" value={stats.deliveredToday} />
-        <Stat label="Failed" value={stats.failed} />
+      <div className="delivery-hero-card">
+        <div>
+          <span>Online delivery workspace</span>
+          <h1>Hi, {user?.name || "Partner"}</h1>
+          <p>Keep assigned orders moving with route, call, status, and live GPS controls close at hand.</p>
+        </div>
+        <b>Active</b>
       </div>
-      <h2>Active Orders</h2>
+      <div className="delivery-stat-grid">
+        <Stat label="Assigned" value={stats.assigned} icon={ReceiptText} />
+        <Stat label="Picked up" value={stats.pickedUp} icon={PackageCheck} />
+        <Stat label="On the way" value={stats.onTheWay} icon={Truck} />
+        <Stat label="Delivered today" value={stats.deliveredToday} icon={CheckCircle2} />
+        <Stat label="Failed" value={stats.failed} icon={ReceiptText} />
+      </div>
+      <div className="delivery-section-head">
+        <h2>Active Orders</h2>
+        <span>{activeOrders.length} assigned</span>
+      </div>
       <div className="delivery-list">
         {activeOrders.length ? activeOrders.map((order) => <DeliveryOrderCard key={order.orderId} order={order} />) : <div className="delivery-state">No active assigned orders.</div>}
       </div>
@@ -45,6 +58,12 @@ export default function DeliveryDashboard() {
   );
 }
 
-function Stat({ label, value }) {
-  return <article className="delivery-stat-card"><span>{label}</span><strong>{value}</strong></article>;
+function Stat({ label, value, icon: Icon }) {
+  return (
+    <article className="delivery-stat-card">
+      <span className="delivery-stat-icon"><Icon size={18} /></span>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </article>
+  );
 }

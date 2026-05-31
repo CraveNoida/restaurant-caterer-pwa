@@ -4,13 +4,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Order food, book catering, and track deliveries from Ahmad Caterers." />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="theme-color" content="#15110d" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Ahmad Caterers" />
-    <link rel="icon" href="/icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <script>
+      (() => {
+        const path = window.location.pathname;
+        const config = path.startsWith("/admin")
+          ? {
+              manifest: "/admin-manifest.json",
+              theme: "#111827",
+              title: "Ahmad Admin",
+              icon: "/icons/admin-icon-192.png"
+            }
+          : path.startsWith("/delivery")
+            ? {
+                manifest: "/delivery-manifest.json",
+                theme: "#0f766e",
+                title: "Ahmad Delivery",
+                icon: "/icons/delivery-icon-192.png"
+              }
+            : {
+                manifest: "/manifest.json",
+                theme: "#15110d",
+                title: "Ahmad Caterers",
+                icon: "/icons/icon-192.png"
+              };
+
+        const addLink = (rel, href) => {
+          const link = document.createElement("link");
+          link.setAttribute("rel", rel);
+          link.setAttribute("href", href);
+          document.head.appendChild(link);
+        };
+
+        document.querySelector('meta[name="theme-color"]')?.setAttribute("content", config.theme);
+        document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute("content", config.title);
+        addLink("icon", config.icon);
+        addLink("apple-touch-icon", config.icon);
+        addLink("manifest", config.manifest);
+      })();
+    </script>
     <title>Ahmad Caterers</title>
   </head>
   <body>

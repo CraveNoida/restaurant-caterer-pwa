@@ -10,6 +10,7 @@ export default function PwaManualInstallNote() {
   const location = useLocation();
   const pwaConfig = getPwaAppConfig(location.pathname);
   const [showNote, setShowNote] = useState(false);
+  const [showFallbackHelp, setShowFallbackHelp] = useState(false);
 
   useEffect(() => {
     setShowNote(false);
@@ -37,9 +38,34 @@ export default function PwaManualInstallNote() {
 
   if (!showNote) return null;
 
+  const installApp = async () => {
+    const event = window.__pwaInstallPromptEvent;
+    const eventAppType = window.__pwaInstallPromptAppType;
+
+    if (event && eventAppType === pwaConfig.appType) {
+      event.prompt();
+      const choice = await event.userChoice.catch(() => null);
+      if (choice?.outcome === "accepted") setShowNote(false);
+      window.__pwaInstallPromptEvent = null;
+      window.__pwaInstallPromptAppType = null;
+      return;
+    }
+
+    setShowFallbackHelp(true);
+  };
+
   return (
-    <p className="pwa-manual-install-note">
-      To install this app, open browser menu and tap Add to Home screen.
-    </p>
+    <div className="pwa-manual-install-note">
+      <span>
+        <strong>{pwaConfig.title}</strong>
+        <small>{pwaConfig.appType === "admin" ? "Opens directly to /admin/login." : "Opens directly to /delivery/login."}</small>
+      </span>
+      <button type="button" onClick={installApp}>Install App</button>
+      {showFallbackHelp && (
+        <small className="pwa-manual-help">
+          Browser install prompt is not available right now. Open browser menu and tap Add to Home screen.
+        </small>
+      )}
+    </div>
   );
 }

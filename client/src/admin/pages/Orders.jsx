@@ -6,6 +6,7 @@ import AdminToast from "../components/AdminToast.jsx";
 import { joinOrderTracking } from "../../services/socketService.js";
 import { LiveTrackingMap } from "../../components/maps/index.js";
 import { googleMapsRouteUrl, googleMapsUrl } from "../../utils/mapUtils.js";
+import { DetailDrawer, FilterChips, InfoGrid, PageHeader, SearchInput } from "../components/AdminUI.jsx";
 
 const nextStatus = {
   placed: "accepted",
@@ -116,41 +117,44 @@ export default function Orders() {
   return (
     <section className="admin-page">
       <AdminToast toast={toast} onClose={() => setToast(null)} />
-      <div className="admin-page-head"><div><h1>Orders</h1><p>Manage customer orders and delivery progress.</p></div></div>
+      <PageHeader title="Orders" subtitle="Manage live and past customer orders, delivery assignment, and customer communication." eyebrow="Order desk" />
       <div className="admin-toolbar">
-        <input placeholder="Search order ID or phone" value={query} onChange={(event) => setQuery(event.target.value)} />
-        <select value={status} onChange={(event) => setStatus(event.target.value)}>
-          <option value="">All statuses</option>
-          {orderStatuses.map((item) => <option key={item} value={item}>{item.replaceAll("_", " ")}</option>)}
-        </select>
+        <SearchInput placeholder="Search order ID, customer, or phone" value={query} onChange={(event) => setQuery(event.target.value)} />
+        <FilterChips options={orderStatuses} value={status} onChange={setStatus} />
       </div>
       {!filtered.length ? state : (
-        <div className="admin-table-wrap">
-          <table>
-            <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>{filtered.map((order) => (
-              <tr key={order._id}>
-                <td>{order.orderId}<br /><small>{dateTime(order.createdAt)}</small></td>
-                <td>{order.customerName}<br /><a href={`tel:${order.customerPhone}`}>{order.customerPhone}</a></td>
-                <td>{order.items?.length || 0}</td>
-                <td>{money(order.totalAmount)}</td>
-                <td><StatusBadge value={order.orderStatus} /></td>
-                <td className="admin-row-actions">
-                  <button type="button" onClick={() => setSelected(order)}>View</button>
-                  {nextStatus[order.orderStatus] && <button type="button" onClick={() => updateStatus(order, nextStatus[order.orderStatus])}>Next</button>}
-                  {order.orderStatus !== "cancelled" && order.orderStatus !== "delivered" && <button type="button" onClick={() => setPendingCancel(order)}>Cancel</button>}
-                  <a href={`https://wa.me/91${order.customerPhone}?text=${encodeURIComponent(`Hi, update for order ${order.orderId}`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
-                </td>
-              </tr>
-            ))}</tbody>
-          </table>
+        <div className="admin-order-list">
+          {filtered.map((order) => (
+            <article className="admin-list-card" key={order._id}>
+              <div>
+                <h3>{order.orderId}</h3>
+                <p>{order.customerName} - <a href={`tel:${order.customerPhone}`}>{order.customerPhone}</a></p>
+                <small>{dateTime(order.createdAt)} - {order.items?.length || 0} items</small>
+              </div>
+              <strong>{money(order.totalAmount)}</strong>
+              <StatusBadge value={order.paymentStatus || "pending"} />
+              <StatusBadge value={order.orderStatus} />
+              <div className="admin-row-actions">
+                <button type="button" onClick={() => setSelected(order)}>View</button>
+                {nextStatus[order.orderStatus] && <button type="button" onClick={() => updateStatus(order, nextStatus[order.orderStatus])}>Update</button>}
+                <a href={`tel:${order.customerPhone}`}>Call</a>
+                <a href={`https://wa.me/91${order.customerPhone}?text=${encodeURIComponent(`Hi, update for order ${order.orderId}`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
+              </div>
+            </article>
+          ))}
         </div>
       )}
       {selected && (
-        <section className="admin-detail-panel">
-          <button type="button" onClick={() => setSelected(null)}>Close</button>
-          <h2>{selected.orderId}</h2>
-          <p>{selected.deliveryAddress || "Pickup order"} {selected.houseDetails ? `- ${selected.houseDetails}` : ""} {selected.landmark ? `- ${selected.landmark}` : ""}</p>
+        <DetailDrawer title={selected.orderId} subtitle={selected.deliveryAddress || "Pickup order"} onClose={() => setSelected(null)}>
+          <InfoGrid items={[
+            ["Customer", selected.customerName],
+            ["Phone", <a href={`tel:${selected.customerPhone}`}>{selected.customerPhone}</a>],
+            ["Total", money(selected.totalAmount)],
+            ["Payment", <StatusBadge value={selected.paymentStatus || "pending"} />],
+            ["Order status", <StatusBadge value={selected.orderStatus} />],
+            ["Address", `${selected.deliveryAddress || "Pickup"} ${selected.houseDetails || ""} ${selected.landmark || ""}`]
+          ]} />
+          <h3>Items</h3>
           <div className="admin-list">{selected.items?.map((item) => <span key={`${item.name}-${item.quantity}`}>{item.quantity} x {item.name} - {money(item.price * item.quantity)}</span>)}</div>
           <div className="admin-tracking-card">
             <div>
@@ -183,7 +187,7 @@ export default function Orders() {
             {selected.orderStatus !== "cancelled" && selected.orderStatus !== "delivered" && <button type="button" className="danger" onClick={() => setPendingCancel(selected)}>Cancel order</button>}
             <button type="button" disabled>Print bill</button>
           </div>
-        </section>
+        </DetailDrawer>
       )}
       <ConfirmationModal
         actionLabel="Cancel order"

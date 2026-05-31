@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { adminService } from "../../services/adminService.js";
 import { AdminPageState, StatusBadge, dateTime, money } from "./adminUtils.jsx";
 import { CalendarDays, CreditCard, ReceiptText, Truck, Users, Utensils } from "../../customer/components/icons.jsx";
+import { AdminCard, ProgressBars, StatCard } from "../components/AdminUI.jsx";
 
 const metricIcons = [ReceiptText, CreditCard, CalendarDays, Truck, Utensils, CalendarDays, Users, Truck];
 
@@ -63,49 +64,57 @@ export default function Dashboard() {
         {cards.map(([label, value, hint], index) => {
           const Icon = metricIcons[index] || ReceiptText;
           return (
-            <article className="admin-stat-card" key={label}>
-              <span className="admin-stat-icon"><Icon size={18} /></span>
-              <div>
-                <span>{label}</span>
-                <strong>{value ?? 0}</strong>
-                <small>{hint}</small>
-              </div>
-            </article>
+            <StatCard key={label} icon={Icon} label={label} value={value} helper={hint} />
           );
         })}
       </div>
-      <section className="admin-card admin-status-overview">
+      <AdminCard className="admin-status-overview">
         <div>
           <span className="admin-eyebrow">Order Status</span>
           <h2>Kitchen and delivery pulse</h2>
         </div>
-        <div className="admin-status-pipeline">
-          {["placed", "accepted", "preparing", "ready", "out_for_delivery", "delivered"].map((item) => (
-            <span key={item}><b>{statusCounts[item] || 0}</b>{item.replaceAll("_", " ")}</span>
-          ))}
-        </div>
-      </section>
+        <ProgressBars items={["placed", "accepted", "preparing", "ready", "out_for_delivery", "delivered"].map((item) => ({
+          label: item.replaceAll("_", " "),
+          value: statusCounts[item] || 0
+        }))} />
+      </AdminCard>
       <div className="admin-two-column">
-        <section className="admin-card">
-          <h2>Recent Orders</h2>
-          <div className="admin-table-wrap">
-            <table><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
-              <tbody>{(data?.recentOrders || []).map((order) => (
-                <tr key={order._id}><td>{order.orderId}</td><td>{order.customerName}<br />{order.customerPhone}</td><td>{money(order.totalAmount)}</td><td><StatusBadge value={order.orderStatus} /></td><td>{dateTime(order.createdAt)}</td></tr>
-              ))}</tbody>
-            </table>
+        <AdminCard title="Recent Orders" eyebrow="Live activity">
+          <div className="admin-order-list">
+            {(data?.recentOrders || []).map((order) => (
+              <article className="admin-list-card" key={order._id}>
+                <div>
+                  <h3>{order.orderId}</h3>
+                  <p>{order.customerName} - {order.customerPhone}</p>
+                </div>
+                <strong>{money(order.totalAmount)}</strong>
+                <StatusBadge value={order.orderStatus} />
+                <small>{dateTime(order.createdAt)}</small>
+              </article>
+            ))}
           </div>
-        </section>
-        <section className="admin-card">
-          <h2>Recent Catering Enquiries</h2>
-          <div className="admin-table-wrap">
-            <table><thead><tr><th>Booking</th><th>Customer</th><th>Event</th><th>Status</th></tr></thead>
-              <tbody>{(data?.recentBookings || []).map((booking) => (
-                <tr key={booking._id}><td>{booking.bookingId}</td><td>{booking.customerName}<br />{booking.phone}</td><td>{booking.eventType}</td><td><StatusBadge value={booking.bookingStatus} /></td></tr>
-              ))}</tbody>
-            </table>
+        </AdminCard>
+        <AdminCard title="Operations Summary" eyebrow="Catering CRM">
+          <div className="admin-order-list">
+            {(data?.recentBookings || []).map((booking) => (
+              <article className="admin-list-card" key={booking._id}>
+                <div>
+                  <h3>{booking.bookingId}</h3>
+                  <p>{booking.customerName} - {booking.phone}</p>
+                </div>
+                <strong>{booking.eventType}</strong>
+                <StatusBadge value={booking.bookingStatus} />
+              </article>
+            ))}
+            <div className="admin-list-card">
+              <div>
+                <h3>Pending tasks</h3>
+                <p>Review new orders, active deliveries, and fresh catering leads.</p>
+              </div>
+              <StatusBadge value="pending" />
+            </div>
           </div>
-        </section>
+        </AdminCard>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { adminBookingService } from "../../services/adminService.js";
 import { AdminPageState, StatusBadge, bookingStatuses, dateTime, money } from "./adminUtils.jsx";
 import AdminToast from "../components/AdminToast.jsx";
+import { DetailDrawer, FilterChips, InfoGrid, PageHeader, SearchInput } from "../components/AdminUI.jsx";
 
 export default function CateringBookings() {
   const [bookings, setBookings] = useState([]);
@@ -53,44 +54,47 @@ export default function CateringBookings() {
   return (
     <section className="admin-page">
       <AdminToast toast={toast} onClose={() => setToast(null)} />
-      <div className="admin-page-head"><div><h1>Catering Bookings</h1><p>Manage enquiries, quotations, and booking status.</p></div></div>
+      <PageHeader title="Catering Bookings" subtitle="Track event enquiries, quotations, advance payments, and confirmed catering work." eyebrow="Event CRM" />
       <div className="admin-toolbar">
-        <input placeholder="Search customer, phone, event" value={query} onChange={(event) => setQuery(event.target.value)} />
-        <select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{bookingStatuses.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+        <SearchInput placeholder="Search customer, phone, event" value={query} onChange={(event) => setQuery(event.target.value)} />
+        <FilterChips options={bookingStatuses} value={status} onChange={setStatus} />
       </div>
       {!filtered.length ? state : (
-        <div className="admin-table-wrap">
-          <table><thead><tr><th>Booking</th><th>Customer</th><th>Event</th><th>Guests</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>{filtered.map((booking) => (
-              <tr key={booking._id}><td>{booking.bookingId}<br /><small>{dateTime(booking.createdAt)}</small></td><td>{booking.customerName}<br /><a href={`tel:${booking.phone}`}>{booking.phone}</a></td><td>{booking.eventType}<br />{dateTime(booking.eventDate)}</td><td>{booking.guestCount}</td><td><StatusBadge value={booking.bookingStatus} /></td><td className="admin-row-actions"><button type="button" onClick={() => { setSelected(booking); setQuotation({}); }}>View</button><a href={`https://wa.me/91${booking.phone}?text=${encodeURIComponent(`Hi, regarding catering enquiry ${booking.bookingId}`)}`} target="_blank" rel="noreferrer">WhatsApp</a></td></tr>
-            ))}</tbody>
-          </table>
+        <div className="admin-order-list">
+          {filtered.map((booking) => (
+            <article className="admin-list-card" key={booking._id}>
+              <div>
+                <h3>{booking.customerName}</h3>
+                <p>{booking.bookingId} - <a href={`tel:${booking.phone}`}>{booking.phone}</a></p>
+                <small>{booking.eventType} - {dateTime(booking.eventDate)}</small>
+              </div>
+              <strong>{booking.guestCount || 0} guests</strong>
+              <span>{booking.budget || money(booking.estimatedPrice)}</span>
+              <StatusBadge value={booking.bookingStatus} />
+              <div className="admin-row-actions">
+                <button type="button" onClick={() => { setSelected(booking); setQuotation({}); }}>View</button>
+                <a href={`https://wa.me/91${booking.phone}?text=${encodeURIComponent(`Hi, regarding catering enquiry ${booking.bookingId}`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
+              </div>
+            </article>
+          ))}
         </div>
       )}
       {selected && (
-        <section className="admin-detail-panel">
-          <button type="button" onClick={() => setSelected(null)}>Close</button>
-          <h2>{selected.bookingId}</h2>
-          <div className="admin-detail-grid">
-            <span><strong>Customer</strong>{selected.customerName}</span>
-            <span><strong>Phone</strong><a href={`tel:${selected.phone}`}>{selected.phone}</a></span>
-            <span><strong>Email</strong>{selected.email || "N/A"}</span>
-            <span><strong>Event type</strong>{selected.eventType}</span>
-            <span><strong>Event date</strong>{dateTime(selected.eventDate)}</span>
-            <span><strong>Event time</strong>{selected.eventTime || "N/A"}</span>
-            <span><strong>Venue</strong>{selected.venue || "N/A"}</span>
-            <span><strong>Guest count</strong>{selected.guestCount}</span>
-            <span><strong>Food preference</strong>{selected.foodPreference || "N/A"}</span>
-            <span><strong>Package type</strong>{selected.packageType || "N/A"}</span>
-            <span><strong>Selected menu items</strong>{selected.selectedMenuItems?.length || 0}</span>
-            <span><strong>Estimated price</strong>{money(selected.estimatedPrice)}</span>
-            <span><strong>Budget</strong>{selected.budget || "N/A"}</span>
-            <span><strong>Quotation</strong>{money(selected.quotationAmount)}</span>
-            <span><strong>Advance paid</strong>{money(selected.advancePaid)}</span>
-            <span><strong>Final payment</strong>{money(selected.finalPayment)}</span>
-            <span><strong>Status</strong><StatusBadge value={selected.bookingStatus} /></span>
-            <span><strong>Created</strong>{dateTime(selected.createdAt)}</span>
-          </div>
+        <DetailDrawer title={selected.bookingId} subtitle={`${selected.eventType} - ${dateTime(selected.eventDate)}`} onClose={() => setSelected(null)}>
+          <InfoGrid items={[
+            ["Customer", selected.customerName],
+            ["Phone", <a href={`tel:${selected.phone}`}>{selected.phone}</a>],
+            ["Email", selected.email],
+            ["Venue", selected.venue],
+            ["Guests", selected.guestCount],
+            ["Budget", selected.budget],
+            ["Estimated price", money(selected.estimatedPrice)],
+            ["Quotation", money(selected.quotationAmount)],
+            ["Advance paid", money(selected.advancePaid)],
+            ["Final payment", money(selected.finalPayment)],
+            ["Status", <StatusBadge value={selected.bookingStatus} />],
+            ["Created", dateTime(selected.createdAt)]
+          ]} />
           <section className="admin-card slim">
             <strong>Special requirements</strong>
             <p>{selected.specialRequirements || "N/A"}</p>
@@ -105,7 +109,7 @@ export default function CateringBookings() {
           </div>
           <textarea placeholder="Admin notes" value={quotation.adminNotes ?? selected.adminNotes ?? ""} onChange={(event) => setQuotation((current) => ({ ...current, adminNotes: event.target.value }))} />
           <button type="button" onClick={saveQuotation}>Save quotation</button>
-        </section>
+        </DetailDrawer>
       )}
     </section>
   );

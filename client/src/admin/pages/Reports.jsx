@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { adminBookingService, adminOrderService } from "../../services/adminService.js";
 import { AdminPageState, money, todayKey } from "./adminUtils.jsx";
+import { AdminCard, PageHeader, ProgressBars, StatCard } from "../components/AdminUI.jsx";
+import { CalendarDays, CreditCard, ReceiptText, Utensils } from "../../customer/components/icons.jsx";
 
 export default function Reports() {
   const [orders, setOrders] = useState([]);
@@ -51,20 +53,20 @@ export default function Reports() {
 
   return (
     <section className="admin-page">
-      <div className="admin-page-head"><div><h1>Reports</h1><p>Basic order, revenue, and catering summaries.</p></div></div>
+      <PageHeader title="Reports" subtitle="Analytics for revenue, orders, catering leads, payment methods, and top selling items." eyebrow="Analytics" />
       <div className="admin-stat-grid">
-        <article className="admin-stat-card"><span>Total Revenue</span><strong>{money(report.revenue)}</strong></article>
-        <article className="admin-stat-card"><span>Monthly Orders</span><strong>{orders.length}</strong></article>
-        <article className="admin-stat-card"><span>Catering Enquiries</span><strong>{bookings.length}</strong></article>
-        <article className="admin-stat-card"><span>Completed / Cancelled</span><strong>{report.completed} / {report.cancelled}</strong></article>
+        <StatCard icon={CreditCard} label="Total Revenue" value={money(report.revenue)} helper="Non-cancelled orders" />
+        <StatCard icon={ReceiptText} label="Orders" value={orders.length} helper="All order records" />
+        <StatCard icon={CalendarDays} label="Catering Leads" value={bookings.length} helper="Event enquiries" />
+        <StatCard icon={Utensils} label="Completed / Cancelled" value={`${report.completed} / ${report.cancelled}`} helper="Fulfillment quality" />
       </div>
       <div className="admin-two-column">
-        <section className="admin-card"><h2>Daily Orders</h2>{Object.entries(report.daily).map(([date, count]) => <p key={date}>{date}: {count}</p>)}</section>
-        <section className="admin-card"><h2>Monthly Orders</h2>{Object.entries(report.monthlyOrders).map(([month, count]) => <p key={month}>{month}: {count}</p>)}</section>
-        <section className="admin-card"><h2>Monthly Revenue</h2>{Object.entries(report.monthlyRevenue).map(([month, amount]) => <p key={month}>{month}: {money(amount)}</p>)}</section>
-        <section className="admin-card"><h2>Payment Methods</h2>{Object.entries(report.paymentMethods).map(([method, count]) => <p key={method}>{method}: {count}</p>)}</section>
-        <section className="admin-card"><h2>Catering Enquiry Summary</h2>{Object.entries(report.cateringByStatus).map(([status, count]) => <p key={status}>{status}: {count}</p>)}</section>
-        <section className="admin-card"><h2>Top Selling Items</h2>{report.topItems.map(([name, count]) => <p key={name}>{name}: {count}</p>)}</section>
+        <AdminCard title="Daily Orders"><ProgressBars items={Object.entries(report.daily).map(([label, value]) => ({ label, value }))} /></AdminCard>
+        <AdminCard title="Monthly Orders"><ProgressBars items={Object.entries(report.monthlyOrders).map(([label, value]) => ({ label, value }))} /></AdminCard>
+        <AdminCard title="Monthly Revenue"><ProgressBars items={Object.entries(report.monthlyRevenue).map(([label, value]) => ({ label, value: Number(value || 0), display: money(value) }))} /></AdminCard>
+        <AdminCard title="Payment Method Summary"><ProgressBars items={Object.entries(report.paymentMethods).map(([label, value]) => ({ label, value }))} /></AdminCard>
+        <AdminCard title="Catering Lead Summary"><ProgressBars items={Object.entries(report.cateringByStatus).map(([label, value]) => ({ label: label.replaceAll("_", " "), value }))} /></AdminCard>
+        <AdminCard title="Top Selling Items"><ProgressBars items={report.topItems.map(([label, value]) => ({ label, value }))} /></AdminCard>
       </div>
     </section>
   );

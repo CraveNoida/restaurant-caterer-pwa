@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { ReceiptText, Search, UserRound } from "../../customer/components/icons.jsx";
+import { CalendarDays, ReceiptText, Search, UserRound } from "../../customer/components/icons.jsx";
 
 const quickLinks = [
   { to: "/admin/dashboard", label: "Dashboard" },
@@ -20,20 +20,23 @@ export default function AdminLayout() {
     <div className="admin-app">
       {isMenuOpen && <button type="button" className="admin-drawer-backdrop" aria-label="Close menu" onClick={() => setIsMenuOpen(false)} />}
       <div className={`admin-drawer${isMenuOpen ? " open" : ""}`}>
-        <Sidebar onNavigate={() => setIsMenuOpen(false)} />
+        <Sidebar onNavigate={() => setIsMenuOpen(false)} onLogout={logout} />
       </div>
-      <Sidebar />
+      <Sidebar onLogout={logout} />
       <main className="admin-main">
         <header className="admin-topbar">
-          <button type="button" className="admin-menu-button" onClick={() => setIsMenuOpen(true)}>Menu</button>
+          <button type="button" className="admin-menu-button" onClick={() => setIsMenuOpen(true)} aria-label="Open menu">Menu</button>
           <div className="admin-topbar-title">
-            <span>Operations workspace</span>
+            <span>Restaurant operations</span>
             <strong>Good day, {user?.name || "Admin"}</strong>
           </div>
           <label className="admin-topbar-search">
             <Search size={16} />
             <input placeholder="Search orders, customers, bookings" />
           </label>
+          <button type="button" className="admin-notification-button" aria-label="Today">
+            <CalendarDays size={18} />
+          </button>
           <button type="button" className="admin-notification-button" aria-label="Notifications">
             <ReceiptText size={18} />
           </button>
@@ -44,7 +47,6 @@ export default function AdminLayout() {
               <small>{user?.email || user?.phone}</small>
             </div>
           </div>
-          <button type="button" onClick={logout}>Logout</button>
         </header>
         <nav className="admin-quick-nav" aria-label="Quick admin navigation">
           {quickLinks.map((link) => (

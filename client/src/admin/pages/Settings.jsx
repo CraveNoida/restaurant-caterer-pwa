@@ -1,5 +1,6 @@
 import { useState } from "react";
 import AdminToast from "../components/AdminToast.jsx";
+import { PageHeader } from "../components/AdminUI.jsx";
 
 const storageKey = "ahmad_admin_settings";
 const defaultSettings = {
@@ -33,20 +34,31 @@ export default function Settings() {
   return (
     <section className="admin-page">
       <AdminToast toast={toast} onClose={() => setToast(null)} />
-      <div className="admin-page-head">
-        <div>
-          <h1>Settings</h1>
-          <p>Restaurant settings placeholder saved locally until backend settings are ready.</p>
-        </div>
-      </div>
+      <PageHeader title="Settings" subtitle="Product-style settings for restaurant profile, contact info, charges, delivery, and admin preferences." eyebrow="Workspace settings" />
       <form className="admin-card admin-form-grid" onSubmit={saveSettings}>
-        <input value={settings.restaurantName} onChange={(event) => updateField("restaurantName", event.target.value)} placeholder="Restaurant name" />
-        <input value={settings.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="Phone" />
-        <input value={settings.whatsapp} onChange={(event) => updateField("whatsapp", event.target.value)} placeholder="WhatsApp number" />
-        <input value={settings.address} onChange={(event) => updateField("address", event.target.value)} placeholder="Address" />
-        <input value={settings.openingHours} onChange={(event) => updateField("openingHours", event.target.value)} placeholder="Opening hours" />
-        <input value={settings.deliveryCharge} onChange={(event) => updateField("deliveryCharge", event.target.value)} placeholder="Delivery charge" />
-        <input value={settings.packingCharge} onChange={(event) => updateField("packingCharge", event.target.value)} placeholder="Packing charge" />
+        <div className="admin-form-section">
+          <h3>Restaurant Profile</h3>
+          <input value={settings.restaurantName} onChange={(event) => updateField("restaurantName", event.target.value)} placeholder="Restaurant name" />
+          <input value={settings.address} onChange={(event) => updateField("address", event.target.value)} placeholder="Address" />
+        </div>
+        <div className="admin-form-section">
+          <h3>Contact Info</h3>
+          <input value={settings.phone} onChange={(event) => updateField("phone", event.target.value)} placeholder="Phone" />
+          <input value={settings.whatsapp} onChange={(event) => updateField("whatsapp", event.target.value)} placeholder="WhatsApp number" />
+        </div>
+        <div className="admin-form-section">
+          <h3>Business Hours</h3>
+          <input value={settings.openingHours} onChange={(event) => updateField("openingHours", event.target.value)} placeholder="Opening hours" />
+        </div>
+        <div className="admin-form-section">
+          <h3>Delivery Settings & Charges</h3>
+          <input value={settings.deliveryCharge} onChange={(event) => updateField("deliveryCharge", event.target.value)} placeholder="Delivery charge" />
+          <input value={settings.packingCharge} onChange={(event) => updateField("packingCharge", event.target.value)} placeholder="Packing charge" />
+        </div>
+        <div className="admin-form-section">
+          <h3>PWA/Admin Preferences</h3>
+          <p>Preferences are ready for backend-backed settings when available.</p>
+        </div>
         <button type="submit">Save settings</button>
       </form>
     </section>

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { adminService } from "../../services/adminService.js";
 import { AdminPageState, StatusBadge, dateTime, money } from "./adminUtils.jsx";
 import AdminToast from "../components/AdminToast.jsx";
+import { FilterChips, PageHeader, StatCard } from "../components/AdminUI.jsx";
+import { CreditCard, ReceiptText, Wallet } from "../../customer/components/icons.jsx";
 
 export default function Payments() {
   const [data, setData] = useState({ payments: [], orders: [] });
@@ -89,31 +91,36 @@ export default function Payments() {
   return (
     <section className="admin-page">
       <AdminToast toast={toast} onClose={() => setToast(null)} />
-      <div className="admin-page-head"><div><h1>Payments</h1><p>COD, UPI, Razorpay placeholders, and catering payments.</p></div></div>
+      <PageHeader title="Payments" subtitle="Finance dashboard for collections, pending payments, COD, UPI, and failed transactions." eyebrow="Finance" />
       <div className="admin-toolbar">
-        <select value={method} onChange={(event) => setMethod(event.target.value)}>
-          <option value="">All methods</option>
-          <option value="COD">COD</option>
-          <option value="UPI">UPI</option>
-          <option value="Razorpay">Razorpay</option>
-        </select>
-        <select value={status} onChange={(event) => setStatus(event.target.value)}>
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="paid">Paid</option>
-          <option value="failed">Failed</option>
-        </select>
+        <FilterChips options={["COD", "UPI", "Razorpay"]} value={method} onChange={setMethod} allLabel="All methods" />
+        <FilterChips options={["pending", "paid", "failed"]} value={status} onChange={setStatus} allLabel="All statuses" />
       </div>
       <div className="admin-stat-grid">
-        <article className="admin-stat-card"><span>COD Orders</span><strong>{summary.COD}</strong></article>
-        <article className="admin-stat-card"><span>UPI Payments</span><strong>{summary.UPI}</strong></article>
-        <article className="admin-stat-card"><span>Razorpay Placeholder</span><strong>{summary.Razorpay}</strong></article>
-        <article className="admin-stat-card"><span>Catering Payments</span><strong>{money(summary.catering)}</strong></article>
-        <article className="admin-stat-card"><span>Pending</span><strong>{summary.pending}</strong></article>
-        <article className="admin-stat-card"><span>Paid</span><strong>{summary.paid}</strong></article>
-        <article className="admin-stat-card"><span>Failed</span><strong>{summary.failed}</strong></article>
+        <StatCard icon={Wallet} label="Total Collected" value={summary.paid} helper="Paid records" />
+        <StatCard icon={ReceiptText} label="Pending" value={summary.pending} helper="Needs follow-up" />
+        <StatCard icon={CreditCard} label="COD" value={summary.COD} helper="Cash orders" />
+        <StatCard icon={CreditCard} label="UPI" value={summary.UPI} helper="UPI payments" />
+        <StatCard icon={CreditCard} label="Failed" value={summary.failed} helper="Payment issues" />
+        <StatCard icon={Wallet} label="Catering Payments" value={money(summary.catering)} helper="Event revenue" />
       </div>
-      <div className="admin-table-wrap"><table><thead><tr><th>Reference</th><th>Customer</th><th>Method</th><th>Amount</th><th>Status</th><th>Transaction</th><th>Date</th><th>Action</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td>{row.reference}</td><td>{row.customer}</td><td>{row.type}</td><td>{money(row.amount)}</td><td><StatusBadge value={row.status} /></td><td>{row.transactionId}</td><td>{dateTime(row.date)}</td><td>{row.canMarkPaid ? <button type="button" onClick={() => markPaid(row)}>Mark paid</button> : "N/A"}</td></tr>)}</tbody></table></div>
+      <div className="admin-order-list">
+        {rows.map((row) => (
+          <article className="admin-list-card" key={row.id}>
+            <div>
+              <h3>{row.reference}</h3>
+              <p>{row.customer} - {dateTime(row.date)}</p>
+              <small>{row.transactionId}</small>
+            </div>
+            <strong>{money(row.amount)}</strong>
+            <span className="admin-tag">{row.type}</span>
+            <StatusBadge value={row.status} />
+            <div className="admin-row-actions">
+              {row.canMarkPaid ? <button type="button" onClick={() => markPaid(row)}>Mark paid</button> : <button type="button" disabled>Settled</button>}
+            </div>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }

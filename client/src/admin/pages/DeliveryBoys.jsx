@@ -3,6 +3,7 @@ import { adminService } from "../../services/adminService.js";
 import { AdminPageState } from "./adminUtils.jsx";
 import ConfirmationModal from "../components/ConfirmationModal.jsx";
 import AdminToast from "../components/AdminToast.jsx";
+import { DetailDrawer, PageHeader } from "../components/AdminUI.jsx";
 
 const emptyForm = { name: "", phone: "", email: "", password: "", isActive: true, vehicleNumber: "" };
 
@@ -16,6 +17,7 @@ export default function DeliveryBoys() {
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
     adminService.deliveryBoys()
@@ -28,6 +30,7 @@ export default function DeliveryBoys() {
 
   const edit = (boy) => {
     setEditingId(boy._id);
+    setIsFormOpen(true);
     setForm({
       name: boy.name || boy.user?.name || "",
       phone: boy.phone || boy.user?.phone || "",
@@ -70,6 +73,7 @@ export default function DeliveryBoys() {
       setDeliveryBoys((current) => editingId ? current.map((boy) => boy._id === editingId ? data.deliveryBoy : boy) : [data.deliveryBoy, ...current]);
       setForm(emptyForm);
       setEditingId("");
+      setIsFormOpen(false);
       setToast({ message: editingId ? "Delivery boy updated." : "Delivery boy added." });
     } catch (error) {
       const message = error.message || (editingId ? "Could not update delivery boy." : "Could not add delivery boy.");
@@ -99,18 +103,45 @@ export default function DeliveryBoys() {
   return (
     <section className="admin-page">
       <AdminToast toast={toast} onClose={() => setToast(null)} />
-      <div className="admin-page-head"><div><h1>Delivery Boys</h1><p>Prepare staff accounts for the delivery phase.</p></div></div>
-      <form className="admin-card admin-form-grid" onSubmit={save}>
-        {formError && <div className="admin-inline-error">{formError}</div>}
-        <input required placeholder="Name" value={form.name} onChange={(event) => updateField("name", event.target.value)} />
-        <input required placeholder="Phone" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} />
-        <input placeholder="Email" value={form.email} onChange={(event) => updateField("email", event.target.value)} />
-        <input required={!editingId} placeholder={editingId ? "New password optional" : "Password"} type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} />
-        <input placeholder="Vehicle number" value={form.vehicleNumber} onChange={(event) => updateField("vehicleNumber", event.target.value)} />
-        <label className="admin-check"><input type="checkbox" checked={form.isActive} onChange={(event) => updateField("isActive", event.target.checked)} /> Active</label>
-        <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : editingId ? "Update Delivery Boy" : "Add Delivery Boy"}</button>
-      </form>
-      {!deliveryBoys.length ? state : <div className="admin-table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Status</th><th>Assigned</th><th>Actions</th></tr></thead><tbody>{deliveryBoys.map((boy) => <tr key={boy._id}><td>{boy.name || boy.user?.name}</td><td>{boy.phone || boy.user?.phone}</td><td>{boy.user?.email || "N/A"}</td><td>{boy.isAvailable ? "Active" : "Inactive"}</td><td>{boy.currentOrder ? "Assigned" : "None"}</td><td className="admin-row-actions"><button type="button" onClick={() => edit(boy)}>Edit</button><button type="button" onClick={() => setPendingDelete(boy)}>Deactivate</button><button type="button" disabled>Assigned orders</button></td></tr>)}</tbody></table></div>}
+      <PageHeader title="Delivery Boys" subtitle="Team management for delivery accounts, availability, and assignments." eyebrow="Delivery team" actions={<button type="button" className="admin-primary" onClick={() => { setForm(emptyForm); setEditingId(""); setIsFormOpen(true); }}>Add Delivery Boy</button>} />
+      {!deliveryBoys.length ? state : (
+        <div className="admin-card-grid">
+          {deliveryBoys.map((boy) => (
+            <article className="admin-team-card" key={boy._id}>
+              <div className="admin-card-head">
+                <span className="admin-avatar">{(boy.name || boy.user?.name || "D").slice(0, 1)}</span>
+                <span className={`admin-status ${boy.isAvailable ? "active" : "inactive"}`}>{boy.isAvailable ? "Active" : "Inactive"}</span>
+              </div>
+              <h3>{boy.name || boy.user?.name}</h3>
+              <p><a href={`tel:${boy.phone || boy.user?.phone}`}>{boy.phone || boy.user?.phone}</a></p>
+              <p>{boy.user?.email || "No email"} - {boy.vehicleNumber || "No vehicle"}</p>
+              <div className="admin-detail-grid">
+                <span><strong>Assigned</strong>{boy.currentOrder ? "Assigned" : "None"}</span>
+                <span><strong>Completed</strong>{boy.completedDeliveries || 0}</span>
+              </div>
+              <div className="admin-row-actions">
+                <button type="button" onClick={() => edit(boy)}>Edit</button>
+                <button type="button" onClick={() => setPendingDelete(boy)}>Deactivate</button>
+                <button type="button" disabled>Assigned orders</button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+      {isFormOpen && (
+        <DetailDrawer title={editingId ? "Edit delivery boy" : "Add delivery boy"} subtitle="Create or update delivery staff access." onClose={() => setIsFormOpen(false)}>
+          <form className="admin-form-grid" onSubmit={save}>
+            {formError && <div className="admin-inline-error">{formError}</div>}
+            <input required placeholder="Name" value={form.name} onChange={(event) => updateField("name", event.target.value)} />
+            <input required placeholder="Phone" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} />
+            <input placeholder="Email" value={form.email} onChange={(event) => updateField("email", event.target.value)} />
+            <input required={!editingId} placeholder={editingId ? "New password optional" : "Password"} type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} />
+            <input placeholder="Vehicle number" value={form.vehicleNumber} onChange={(event) => updateField("vehicleNumber", event.target.value)} />
+            <label className="admin-check"><input type="checkbox" checked={form.isActive} onChange={(event) => updateField("isActive", event.target.checked)} /> Active</label>
+            <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : editingId ? "Update Delivery Boy" : "Add Delivery Boy"}</button>
+          </form>
+        </DetailDrawer>
+      )}
       <ConfirmationModal
         actionLabel="Deactivate"
         body={`Deactivate ${pendingDelete?.name || pendingDelete?.user?.name || "this delivery boy"}? They will no longer be able to access delivery work.`}

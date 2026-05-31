@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { CalendarDays, CreditCard, Home, PackageCheck, ReceiptText, ShieldCheck, Truck, Users, Utensils } from "../../customer/components/icons.jsx";
+import { CalendarDays, CreditCard, Home, PackageCheck, ReceiptText, RotateCcw, ShieldCheck, Truck, Users, Utensils } from "../../customer/components/icons.jsx";
 
 const links = [
   { to: "/admin/dashboard", label: "Dashboard", icon: Home },
@@ -13,7 +13,7 @@ const links = [
   { to: "/admin/settings", label: "Settings", icon: ShieldCheck }
 ];
 
-export default function Sidebar({ onNavigate }) {
+export default function Sidebar({ onNavigate, onLogout }) {
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar-brand">
@@ -33,6 +33,10 @@ export default function Sidebar({ onNavigate }) {
           </NavLink>
           );
         })}
+        <button type="button" className="admin-sidebar-logout" onClick={() => { onNavigate?.(); onLogout?.(); }}>
+          <RotateCcw size={18} />
+          Logout
+        </button>
       </nav>
     </aside>
   );

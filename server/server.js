@@ -16,5 +16,13 @@ connectDB()
   })
   .catch((error) => {
     console.error("Failed to start server", error);
+    if (process.env.ALLOW_OFFLINE_ADMIN_LOGIN === "true") {
+      console.warn("Starting API without MongoDB. Offline admin login is enabled for local development.");
+      server.listen(PORT, () => {
+        console.log(`API server running on port ${PORT}`);
+      });
+      return;
+    }
+
     process.exit(1);
   });

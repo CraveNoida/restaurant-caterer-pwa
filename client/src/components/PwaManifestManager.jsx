@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getPwaAppConfig } from "../utils/pwaAppConfig.js";
 
@@ -15,7 +15,7 @@ function ensureMeta(name) {
 export default function PwaManifestManager() {
   const location = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const config = getPwaAppConfig(location.pathname);
     let manifestLink = document.querySelector('link[rel="manifest"]');
     let iconLink = document.querySelector('link[rel="icon"]');
@@ -44,6 +44,13 @@ export default function PwaManifestManager() {
     appleIconLink.setAttribute("href", config.iconHref);
     ensureMeta("theme-color").setAttribute("content", config.themeColor);
     ensureMeta("apple-mobile-web-app-title").setAttribute("content", config.appleTitle);
+    window.__pwaCurrentAppType = config.appType;
+    window.__pwaCurrentManifestHref = config.manifestHref;
+    window.dispatchEvent(new CustomEvent("pwa-manifest-selected", { detail: config }));
+
+    if (import.meta.env.DEV || window.localStorage?.getItem("pwa-debug") === "1") {
+      console.info("PWA manifest selected:", config.manifestHref, "for", location.pathname);
+    }
   }, [location.pathname]);
 
   return null;

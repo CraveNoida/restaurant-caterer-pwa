@@ -16,6 +16,7 @@
         const path = window.location.pathname;
         const config = path.startsWith("/admin")
           ? {
+              appType: "admin",
               manifest: "/admin-manifest.json",
               theme: "#111827",
               title: "Ahmad Admin",
@@ -23,12 +24,14 @@
             }
           : path.startsWith("/delivery")
             ? {
+                appType: "delivery",
                 manifest: "/delivery-manifest.json",
                 theme: "#0f766e",
                 title: "Ahmad Delivery",
                 icon: "/icons/delivery-icon-192.png"
               }
             : {
+                appType: "customer",
                 manifest: "/manifest.json",
                 theme: "#15110d",
                 title: "Ahmad Caterers",
@@ -40,10 +43,13 @@
         document.querySelector("#pwa-icon")?.setAttribute("href", config.icon);
         document.querySelector("#pwa-apple-icon")?.setAttribute("href", config.icon);
         document.querySelector("#pwa-manifest")?.setAttribute("href", config.manifest);
+        window.__pwaCurrentAppType = config.appType;
+        window.__pwaCurrentManifestHref = config.manifest;
 
         window.addEventListener("beforeinstallprompt", (event) => {
           event.preventDefault();
           window.__pwaInstallPromptEvent = event;
+          window.__pwaInstallPromptAppType = window.__pwaCurrentAppType;
           window.dispatchEvent(new Event("pwa-install-available"));
         });
       })();

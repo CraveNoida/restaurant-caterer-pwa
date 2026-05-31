@@ -16,12 +16,19 @@ export default function PwaInstallPrompt() {
 
   useEffect(() => {
     const applyInstallEvent = (event) => {
+      const eventAppType = window.__pwaInstallPromptAppType || window.__pwaCurrentAppType || pwaConfig.appType;
+      if (eventAppType !== pwaConfig.appType) {
+        setInstallEvent(null);
+        setCanInstall(false);
+        return;
+      }
       setInstallEvent(event);
       setCanInstall(!isStandalone());
     };
     const handleBeforeInstall = (event) => {
       event.preventDefault();
       window.__pwaInstallPromptEvent = event;
+      window.__pwaInstallPromptAppType = window.__pwaCurrentAppType || pwaConfig.appType;
       applyInstallEvent(event);
     };
     const handleInstallAvailable = () => {
@@ -49,7 +56,18 @@ export default function PwaInstallPrompt() {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, []);
+  }, [pwaConfig.appType]);
+
+  useEffect(() => {
+    const eventAppType = window.__pwaInstallPromptAppType || window.__pwaCurrentAppType;
+    if (window.__pwaInstallPromptEvent && eventAppType === pwaConfig.appType) {
+      setInstallEvent(window.__pwaInstallPromptEvent);
+      setCanInstall(!isStandalone());
+      return;
+    }
+    setInstallEvent(null);
+    setCanInstall(false);
+  }, [pwaConfig.appType]);
 
   const installApp = async () => {
     if (!installEvent) return;
@@ -73,6 +91,7 @@ export default function PwaInstallPrompt() {
           <span>
             <strong>{pwaConfig.title}</strong>
             <small>{pwaConfig.subtitle}</small>
+            <small>Start URL: {pwaConfig.startUrl}</small>
           </span>
           <div className="pwa-status-actions">
             <button type="button" onClick={installApp}>Install App</button>

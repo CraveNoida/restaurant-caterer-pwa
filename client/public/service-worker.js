@@ -1,4 +1,4 @@
-const CACHE_NAME = "ahmad-caterers-pwa-v10";
+const CACHE_NAME = "ahmad-caterers-pwa-v11";
 const OFFLINE_URL = "/offline.html";
 const APP_SHELL_URL = "/index.html";
 const PRECACHE_URLS = [

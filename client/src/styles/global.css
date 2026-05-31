@@ -107,6 +107,18 @@ body {
   color: #17312d;
 }
 
+.pwa-manual-install-note {
+  margin: 2px 0 0;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+  padding: 10px 12px;
+}
+
 @media (max-width: 560px) {
   .pwa-status-banner {
     align-items: stretch;

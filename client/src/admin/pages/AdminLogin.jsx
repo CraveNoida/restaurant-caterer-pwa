@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
+import PwaManualInstallNote from "../../components/PwaManualInstallNote.jsx";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function AdminLogin() {
         <label>Phone or email<input required value={form.identifier} onChange={(event) => updateField("identifier", event.target.value)} /></label>
         <label>Password<input required type="password" value={form.password} onChange={(event) => updateField("password", event.target.value)} /></label>
         <button type="submit" disabled={isSubmitting}>{isSubmitting ? "Signing in..." : "Login to Dashboard"}</button>
+        <PwaManualInstallNote />
       </form>
     </main>
   );

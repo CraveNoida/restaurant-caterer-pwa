@@ -183,6 +183,7 @@ export default function TrackOrder() {
       {order.orderType !== "pickup" && (
         <section className="app-card address-card">
           <h2>Delivery Address</h2>
+          {order.houseDetails && <span>House / Flat / Floor: {order.houseDetails}</span>}
           <p>{order.address}</p>
           {order.landmark && <span>Landmark: {order.landmark}</span>}
         </section>

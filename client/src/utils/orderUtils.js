@@ -120,6 +120,7 @@ export function normalizeOrder(order) {
     },
     orderType,
     address: order.address || order.deliveryAddress || checkout.address || "",
+    houseDetails: order.houseDetails || checkout.houseDetails || "",
     landmark: order.landmark || checkout.landmark || "",
     customerLocation: order.customerLocation || checkout.customerLocation || checkout.deliveryLocation || null,
     deliveryLocation: order.deliveryLocation || null,
@@ -141,6 +142,7 @@ export function normalizeOrder(order) {
       phone: order.phone || order.customerPhone || checkout.phone || "",
       email: order.email || checkout.email || "",
       address: order.address || order.deliveryAddress || checkout.address || "",
+      houseDetails: order.houseDetails || checkout.houseDetails || "",
       landmark: order.landmark || checkout.landmark || "",
       customerLocation: order.customerLocation || checkout.customerLocation || checkout.deliveryLocation || null,
       deliveryLocation: checkout.deliveryLocation || order.customerLocation || null,
@@ -177,7 +179,7 @@ export function formatOrderWhatsAppMessage(order, formatCurrency) {
     `Phone: ${normalized.phone || "N/A"}`,
     normalized.orderType === "pickup"
       ? "Order type: Pickup"
-      : `Address: ${normalized.address || "N/A"}${normalized.landmark ? `, Landmark: ${normalized.landmark}` : ""}`,
+      : `Address: ${normalized.houseDetails ? `${normalized.houseDetails}, ` : ""}${normalized.address || "N/A"}${normalized.landmark ? `, Landmark: ${normalized.landmark}` : ""}`,
     `Items:\n${formatOrderItems(normalized.items, formatCurrency)}`,
     `Total: ${formatCurrency(normalized.totalAmount)}`,
     `Payment: ${normalized.paymentMethod}`,

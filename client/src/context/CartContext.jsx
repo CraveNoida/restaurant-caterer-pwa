@@ -164,6 +164,7 @@ export function CartProvider({ children }) {
       totalAmount: orderTotals.grandTotal,
       orderType,
       deliveryAddress: checkoutDetails.address || "",
+      houseDetails: checkoutDetails.houseDetails || "",
       deliveryLocation: checkoutDetails.deliveryLocation,
       landmark: checkoutDetails.landmark || "",
       paymentMethod:

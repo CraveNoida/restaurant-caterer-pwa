@@ -150,7 +150,7 @@ export default function Orders() {
         <section className="admin-detail-panel">
           <button type="button" onClick={() => setSelected(null)}>Close</button>
           <h2>{selected.orderId}</h2>
-          <p>{selected.deliveryAddress || "Pickup order"} {selected.landmark ? `- ${selected.landmark}` : ""}</p>
+          <p>{selected.deliveryAddress || "Pickup order"} {selected.houseDetails ? `- ${selected.houseDetails}` : ""} {selected.landmark ? `- ${selected.landmark}` : ""}</p>
           <div className="admin-list">{selected.items?.map((item) => <span key={`${item.name}-${item.quantity}`}>{item.quantity} x {item.name} - {money(item.price * item.quantity)}</span>)}</div>
           <div className="admin-tracking-card">
             <div>

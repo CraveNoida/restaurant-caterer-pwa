@@ -216,6 +216,7 @@ export default function DeliveryOrderDetails() {
       <article className="delivery-detail-card">
         <span>{order.orderId}</span>
         <h1>{order.customerName}</h1>
+        {order.houseDetails && <small>House / Flat / Floor: {order.houseDetails}</small>}
         <p>{order.address}</p>
         {order.landmark && <small>Landmark: {order.landmark}</small>}
         <b>{deliveryStatusLabels[order.deliveryStatus] || getStatusLabel(order.status)}</b>

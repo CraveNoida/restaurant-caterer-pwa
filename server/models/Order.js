@@ -36,6 +36,7 @@ const orderSchema = new mongoose.Schema(
       default: "delivery"
     },
     deliveryAddress: { type: String, trim: true },
+    houseDetails: { type: String, trim: true },
     landmark: { type: String, trim: true },
     customerLocation: {
       lat: Number,

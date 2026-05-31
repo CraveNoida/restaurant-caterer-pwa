@@ -17,7 +17,7 @@ import { calculateCartTotals } from "../../utils/orderUtils.js";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { paymentService } from "../../services/paymentService.js";
-import { formatAccuracy, googleMapsUrl } from "../../utils/mapUtils.js";
+import { formatAccuracy, googleMapsUrl, reverseGeocode } from "../../utils/mapUtils.js";
 
 function loadRazorpayScript() {
   if (window.Razorpay) return Promise.resolve(true);
@@ -37,6 +37,7 @@ export default function Checkout() {
   const [errors, setErrors] = useState({});
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationNotice, setLocationNotice] = useState(null);
   const paymentLockRef = useRef(false);
   const pendingRazorpayOrderRef = useRef(null);
   const [form, setForm] = useState({
@@ -44,6 +45,7 @@ export default function Checkout() {
     phone: "",
     email: "",
     address: "",
+    houseDetails: "",
     landmark: "",
     deliveryLocation: null,
     fulfillment: "Delivery",
@@ -91,11 +93,12 @@ export default function Checkout() {
 
   const useCurrentLocation = () => {
     setErrors((current) => ({ ...current, address: undefined }));
+    setLocationNotice(null);
 
     if (!window.isSecureContext) {
       setErrors((current) => ({
         ...current,
-        address: "Location access works only on HTTPS. Please open the deployed app link."
+        address: "Unable to detect location. Please try again or enter address manually."
       }));
       return;
     }
@@ -103,14 +106,14 @@ export default function Checkout() {
     if (!navigator.geolocation) {
       setErrors((current) => ({
         ...current,
-        address: "This phone/browser does not support current location detection."
+        address: "Unable to detect location. Please try again or enter address manually."
       }));
       return;
     }
 
     setIsDetectingLocation(true);
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
+      async ({ coords }) => {
         const deliveryLocation = {
           lat: coords.latitude,
           lng: coords.longitude,
@@ -118,20 +121,45 @@ export default function Checkout() {
           mapsLink: googleMapsUrl({ lat: coords.latitude, lng: coords.longitude })
         };
 
-        updateField("deliveryLocation", deliveryLocation);
-        setErrors((current) => ({ ...current, address: undefined }));
-        setIsDetectingLocation(false);
+        setForm((current) => ({ ...current, deliveryLocation }));
+
+        try {
+          const detectedAddress = await reverseGeocode(coords.latitude, coords.longitude);
+          setForm((current) => ({
+            ...current,
+            address: detectedAddress,
+            deliveryLocation
+          }));
+          setErrors((current) => ({ ...current, address: undefined }));
+          setLocationNotice({
+            type: "success",
+            title: "Address detected",
+            message: "Please check and complete your address."
+          });
+        } catch {
+          setErrors((current) => ({
+            ...current,
+            address: "Location detected, but address could not be found. Please enter address manually."
+          }));
+          setLocationNotice({
+            type: "partial",
+            title: "Location detected",
+            message: "GPS location saved for delivery"
+          });
+        } finally {
+          setIsDetectingLocation(false);
+        }
       },
       (error) => {
         const messages = {
-          1: "Location permission was denied. Please allow location access and try again.",
-          2: "Your current location is unavailable. Please check GPS/network and try again.",
-          3: "Location detection timed out. Please try again or enter your address manually."
+          1: "Location permission denied. Please enter your address manually.",
+          2: "Unable to detect location. Please try again or enter address manually.",
+          3: "Unable to detect location. Please try again or enter address manually."
         };
 
         setErrors((current) => ({
           ...current,
-          address: messages[error.code] || "Could not detect current location. Please enter your address manually."
+          address: messages[error.code] || "Unable to detect location. Please try again or enter address manually."
         }));
         setIsDetectingLocation(false);
       },
@@ -215,6 +243,7 @@ export default function Checkout() {
           phone: form.phone.trim(),
           email: form.email.trim(),
           address: form.address.trim(),
+          houseDetails: form.houseDetails.trim(),
           landmark: form.landmark.trim(),
           deliveryLocation: form.deliveryLocation,
           notes: form.notes.trim(),
@@ -331,6 +360,14 @@ export default function Checkout() {
               {errors.address && <small className="field-error">{errors.address}</small>}
             </label>
             <label>
+              House / Flat / Floor
+              <input
+                placeholder="Example: Flat 204, 2nd floor"
+                value={form.houseDetails}
+                onChange={(event) => updateField("houseDetails", event.target.value)}
+              />
+            </label>
+            <label>
               Landmark
               <input value={form.landmark} onChange={(event) => updateField("landmark", event.target.value)} />
             </label>
@@ -340,15 +377,19 @@ export default function Checkout() {
               onClick={useCurrentLocation}
               disabled={isDetectingLocation}
             >
-              <MapPin size={17} /> {isDetectingLocation ? "Detecting location..." : "Use current location"}
+              <MapPin size={17} /> {isDetectingLocation ? "Detecting location..." : "Detect my location"}
             </button>
             {form.deliveryLocation && (
               <section className="location-detected-card">
                 <div>
-                  <span>Location detected successfully</span>
-                  <strong>GPS location saved for delivery</strong>
+                  <span>{locationNotice?.title || "Location detected successfully"}</span>
+                  <strong>{locationNotice?.message || "GPS location saved for delivery"}</strong>
+                  {locationNotice?.type === "success" && <small>Please verify and complete your address</small>}
                   <small>Accuracy: {formatAccuracy(form.deliveryLocation).toLowerCase()}</small>
                 </div>
+                {form.deliveryLocation.mapsLink && (
+                  <a className="app-button outline full-width" href={form.deliveryLocation.mapsLink} target="_blank" rel="noreferrer">Open in Google Maps</a>
+                )}
               </section>
             )}
           </>

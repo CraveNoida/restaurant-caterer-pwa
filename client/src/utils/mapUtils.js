@@ -29,6 +29,53 @@ export function googleMapsRouteUrl(location) {
   return `https://www.google.com/maps/dir/?api=1&destination=${Number(location.lat)},${Number(location.lng)}`;
 }
 
+function formatNominatimAddress(address = {}) {
+  return [
+    address.house_number && address.road ? `${address.house_number} ${address.road}` : address.road,
+    address.neighbourhood || address.suburb || address.city_district,
+    address.city || address.town || address.village,
+    address.state,
+    address.postcode,
+    address.country
+  ].filter(Boolean).join(", ");
+}
+
+export async function reverseGeocode(lat, lng) {
+  if (!hasLocation({ lat, lng })) throw new Error("Invalid location");
+
+  const googleKey = import.meta.env.VITE_GOOGLE_GEOCODING_API_KEY;
+  if (googleKey) {
+    const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
+    url.searchParams.set("latlng", `${Number(lat)},${Number(lng)}`);
+    url.searchParams.set("key", googleKey);
+
+    const response = await fetch(url.toString());
+    if (!response.ok) throw new Error("Google reverse geocoding failed");
+
+    const data = await response.json();
+    const address = data.results?.[0]?.formatted_address;
+    if (data.status !== "OK" || !address) throw new Error("Google reverse geocoding returned no address");
+    return address;
+  }
+
+  const url = new URL("https://nominatim.openstreetmap.org/reverse");
+  url.searchParams.set("format", "jsonv2");
+  url.searchParams.set("lat", Number(lat));
+  url.searchParams.set("lon", Number(lng));
+  url.searchParams.set("zoom", "18");
+  url.searchParams.set("addressdetails", "1");
+
+  const response = await fetch(url.toString(), {
+    headers: { Accept: "application/json" }
+  });
+  if (!response.ok) throw new Error("OpenStreetMap reverse geocoding failed");
+
+  const data = await response.json();
+  const address = data.display_name || formatNominatimAddress(data.address);
+  if (!address) throw new Error("OpenStreetMap reverse geocoding returned no address");
+  return address;
+}
+
 export function formatAccuracy(location) {
   const accuracy = Number(location?.accuracy);
   return Number.isFinite(accuracy) ? `Approx. ${Math.round(accuracy)} meters` : "Approximate location";

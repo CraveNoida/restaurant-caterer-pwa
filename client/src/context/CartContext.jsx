@@ -53,6 +53,20 @@ export function CartProvider({ children }) {
   }, [items]);
 
   useEffect(() => {
+    const clearSavedOrders = () => {
+      setOrders([]);
+      setLatestOrderId(null);
+      localStorage.removeItem(ORDERS_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_ORDERS_STORAGE_KEY);
+      localStorage.removeItem(LATEST_ORDER_ID_KEY);
+      localStorage.removeItem(LEGACY_LAST_ORDER_KEY);
+    };
+
+    window.addEventListener("auth-session-cleared", clearSavedOrders);
+    return () => window.removeEventListener("auth-session-cleared", clearSavedOrders);
+  }, []);
+
+  useEffect(() => {
     saveToLocalStorage(ORDERS_STORAGE_KEY, orders);
   }, [orders]);
 

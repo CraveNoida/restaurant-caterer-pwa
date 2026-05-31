@@ -1,12 +1,12 @@
 import { Link, useParams } from "react-router-dom";
 import { CheckCircle2, ChefHat, Clock, MessageCircle, PackageCheck, Phone, ReceiptText, Truck } from "../components/icons.jsx";
-import { useCart } from "../../context/CartContext.jsx";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import { getStatusLabel, normalizeStatus } from "../../utils/orderUtils.js";
 import { PHONE_NUMBER, WHATSAPP_NUMBER } from "../components/homeData.js";
 import { useEffect, useState } from "react";
 import { orderService } from "../../services/orderService.js";
 import { joinOrderTracking } from "../../services/socketService.js";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 const timeline = [
   ["placed", "Order Placed", CheckCircle2],
@@ -27,8 +27,8 @@ function formatLastUpdated(value) {
 
 export default function TrackOrder() {
   const { id } = useParams();
-  const { getOrderById } = useCart();
-  const [order, setOrder] = useState(() => getOrderById(id));
+  const { isAuthenticated } = useAuth();
+  const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [tracking, setTracking] = useState(null);
@@ -39,6 +39,13 @@ export default function TrackOrder() {
     let isMounted = true;
     setLoading(true);
     setError("");
+
+    if (!isAuthenticated) {
+      setOrder(null);
+      setError("Please login to track your order.");
+      setLoading(false);
+      return undefined;
+    }
 
     orderService
       .getOrder(id)
@@ -55,7 +62,7 @@ export default function TrackOrder() {
       .catch((err) => {
         if (!isMounted) return;
         setError(err.message || "Order not found.");
-        setOrder(getOrderById(id));
+        setOrder(null);
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -64,7 +71,7 @@ export default function TrackOrder() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   useEffect(() => {
     if (!order?.orderId) return undefined;
@@ -93,7 +100,7 @@ export default function TrackOrder() {
         <span className="empty-icon"><ReceiptText size={48} /></span>
         <h1>Order not found</h1>
         <p>{error || "This order could not be found."}</p>
-        <Link className="app-button" to="/my-orders">Go to My Orders</Link>
+        <Link className="app-button" to="/login">Login</Link>
       </div>
     );
   }

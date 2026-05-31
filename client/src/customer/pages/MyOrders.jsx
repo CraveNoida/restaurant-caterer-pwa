@@ -20,7 +20,7 @@ const tabs = [
 ];
 
 export default function MyOrders() {
-  const { orders: guestOrders, reorder, lastOrder } = useCart();
+  const { reorder } = useCart();
   const { isAuthenticated } = useAuth();
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("active");
@@ -29,7 +29,7 @@ export default function MyOrders() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setOrders(lastOrder ? [lastOrder] : []);
+      setOrders([]);
       setLoading(false);
       return;
     }
@@ -45,7 +45,7 @@ export default function MyOrders() {
       .catch((err) => {
         if (!isMounted) return;
         setError(err.message || "Unable to load orders.");
-        setOrders(guestOrders);
+        setOrders([]);
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -54,7 +54,7 @@ export default function MyOrders() {
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, lastOrder]);
+  }, [isAuthenticated]);
   const sortedOrders = useMemo(
     () => [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
     [orders]

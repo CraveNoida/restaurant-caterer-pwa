@@ -2,15 +2,17 @@ import { Link } from "react-router-dom";
 import { CalendarDays, ChevronRight, Headphones, Home, MapPin, MoreVertical, Phone, ReceiptText, ShieldCheck, Star, UserRound } from "../components/icons.jsx";
 import WhatsAppButton from "../components/WhatsAppButton.jsx";
 import { PHONE_NUMBER } from "../components/homeData.js";
-import { useCart } from "../../context/CartContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useEffect, useState } from "react";
 import { bookingService } from "../../services/bookingService.js";
+import { orderService } from "../../services/orderService.js";
+import { COMPLETED_ORDER_STATUSES, normalizeStatus } from "../../utils/orderUtils.js";
 
 export default function Profile() {
-  const { orders } = useCart();
   const { user, isAuthenticated, loading, logout, fetchProfile } = useAuth();
   const [bookings, setBookings] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [orderError, setOrderError] = useState("");
   const [bookingError, setBookingError] = useState("");
 
   useEffect(() => {
@@ -18,22 +20,28 @@ export default function Profile() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setOrders([]);
+      setBookings([]);
+      return;
+    }
     let isMounted = true;
 
-    bookingService
-      .getMyBookings()
-      .then((data) => {
-        if (isMounted) setBookings(data);
-      })
-      .catch((error) => {
-        if (isMounted) setBookingError(error.message || "Unable to load catering bookings.");
+    Promise.allSettled([orderService.getMyOrders(), bookingService.getMyBookings()])
+      .then(([orderResult, bookingResult]) => {
+        if (!isMounted) return;
+        if (orderResult.status === "fulfilled") setOrders(orderResult.value);
+        else setOrderError(orderResult.reason?.message || "Unable to load orders.");
+        if (bookingResult.status === "fulfilled") setBookings(bookingResult.value);
+        else setBookingError(bookingResult.reason?.message || "Unable to load catering bookings.");
       });
 
     return () => {
       isMounted = false;
     };
   }, [isAuthenticated]);
+  const completedOrders = orders.filter((order) => COMPLETED_ORDER_STATUSES.includes(normalizeStatus(order.status))).length;
+  const activeOrders = Math.max(0, orders.length - completedOrders);
 
   return (
     <div className="app-screen profile-screen premium-profile-screen">
@@ -53,10 +61,11 @@ export default function Profile() {
       )}
 
       <section className="premium-stat-grid profile-premium-stats">
-        <ProfileStat icon={ReceiptText} label="Orders" value={orders.length} />
+        <ProfileStat icon={ReceiptText} label="Orders" value={orderError ? "--" : orders.length} />
+        <ProfileStat icon={ReceiptText} label="Active" value={orderError ? "--" : activeOrders} />
         <ProfileStat icon={CalendarDays} label="Bookings" value={bookings.length} />
-        <ProfileStat icon={Star} label="Kitchen rating" value="4.9" />
       </section>
+      {orderError && <p className="muted-text">{orderError}</p>}
 
       <section className="premium-loyalty-card">
         <Star size={58} />
@@ -83,7 +92,7 @@ export default function Profile() {
           <article className="premium-address-card">
             <span><Home size={23} /></span>
             <div>
-              <strong>Address placeholder</strong>
+              <strong>No saved address</strong>
               <p>{isAuthenticated ? "Saved addresses will appear here." : "Login to save delivery addresses."}</p>
             </div>
             <button type="button" aria-label="Address options"><MoreVertical size={21} /></button>
@@ -138,7 +147,7 @@ function ProfileStat({ icon: Icon, label, value }) {
       <span><Icon size={22} fill={Icon === Star ? "currentColor" : "none"} /></span>
       <div>
         <small>{label}</small>
-        {value && <strong>{value}</strong>}
+        <strong>{value}</strong>
       </div>
     </article>
   );

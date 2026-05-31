@@ -166,6 +166,7 @@ export function CartProvider({ children }) {
       deliveryAddress: checkoutDetails.address || "",
       houseDetails: checkoutDetails.houseDetails || "",
       deliveryLocation: checkoutDetails.deliveryLocation,
+      rawDetectedAddress: checkoutDetails.rawDetectedAddress || "",
       landmark: checkoutDetails.landmark || "",
       paymentMethod:
         checkoutDetails.paymentMethod === "Cash on Delivery"

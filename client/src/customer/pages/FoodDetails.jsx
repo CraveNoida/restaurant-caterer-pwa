@@ -5,14 +5,13 @@ import { useCart } from "../../context/CartContext.jsx";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import FoodCard from "../components/FoodCard.jsx";
 import QuantityStepper from "../components/QuantityStepper.jsx";
-import { foodData } from "../data/foodData.js";
 import { menuService } from "../../services/menuService.js";
 
 export default function FoodDetails() {
   const { id } = useParams();
-  const [food, setFood] = useState(() => foodData.find((item) => item.id === id) || null);
-  const [recommendations, setRecommendations] = useState(foodData.filter((item) => item.id !== id).slice(0, 3));
-  const [loading, setLoading] = useState(!food);
+  const [food, setFood] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { items, addToCart, increaseQuantity, decreaseQuantity } = useCart();
   const [spiceLevel, setSpiceLevel] = useState("Medium");
@@ -29,13 +28,12 @@ export default function FoodDetails() {
       .then(([item, list]) => {
         if (!isMounted) return;
         setFood(item);
-        setRecommendations((list.length ? list : foodData).filter((dish) => dish.id !== item?.id).slice(0, 3));
+        setRecommendations(list.filter((dish) => dish.id !== item?.id).slice(0, 3));
       })
       .catch((err) => {
         if (!isMounted) return;
-        const fallback = foodData.find((item) => item.id === id);
-        setFood(fallback || null);
-        setError(fallback ? "Showing demo dish because the backend menu could not be loaded." : err.message);
+        setFood(null);
+        setError(err.message || "Unable to load this menu item.");
       })
       .finally(() => {
         if (isMounted) setLoading(false);

@@ -3,7 +3,6 @@ import { CalendarDays, ChevronRight, MapPin, PackageCheck, Phone, Search, Shield
 import heroImage from "../../assets/images/hero-bg.jpg";
 import canapesImage from "../../assets/images/canapes.jpg";
 import seafoodImage from "../../assets/images/seafood.jpg";
-import { bestSellers, popularDishes, recommendedDishes, todaysSpecial } from "../data/foodData.js";
 import { categoryData } from "../data/categoryData.js";
 import { eventCategories, trustBadges } from "../data/cateringData.js";
 import FoodCard from "../components/FoodCard.jsx";
@@ -11,17 +10,50 @@ import WhatsAppButton from "../components/WhatsAppButton.jsx";
 import { PHONE_NUMBER } from "../components/homeData.js";
 import { useCart } from "../../context/CartContext.jsx";
 import { formatCurrency } from "../../utils/formatCurrency.js";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { menuService } from "../../services/menuService.js";
+import { getDefaultCustomerLocation } from "../../utils/customerLocation.js";
+import { useEffect, useMemo, useState } from "react";
 
 export default function Home() {
   const { orders, reorder } = useCart();
+  const { user, isAuthenticated } = useAuth();
+  const [menuItems, setMenuItems] = useState([]);
+  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuError, setMenuError] = useState("");
   const lastOrder = orders[0];
+  const firstName = user?.name?.split(" ")?.[0];
+  const deliveryLocation = getDefaultCustomerLocation(user);
+  const locationText = deliveryLocation || (isAuthenticated ? "Set delivery location" : "Detect your location");
+  const recommendedDishes = useMemo(() => menuItems.slice(0, 5), [menuItems]);
+  const bestSellers = useMemo(() => menuItems.filter((item) => item.isBestseller || item.tags?.includes("Best Seller")).slice(0, 4), [menuItems]);
+  const popularDishes = bestSellers.length ? bestSellers : menuItems.slice(0, 4);
+  const todaysSpecial = menuItems[0];
+
+  useEffect(() => {
+    let isMounted = true;
+    setMenuLoading(true);
+    menuService.getMenuItems()
+      .then((items) => {
+        if (isMounted) setMenuItems(items);
+      })
+      .catch((error) => {
+        if (isMounted) setMenuError(error.message || "Unable to load menu.");
+      })
+      .finally(() => {
+        if (isMounted) setMenuLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="app-screen home-screen">
       <section className="greeting-card">
         <div>
           <p>Good food, planned faster</p>
-          <h1>Welcome to Ahmad Caterers</h1>
+          <h1>{isAuthenticated && firstName ? `Welcome, ${firstName}` : "Welcome to Ahmad Caterers"}</h1>
         </div>
         <span>Open today</span>
       </section>
@@ -29,7 +61,7 @@ export default function Home() {
       <section className="location-card">
         <div>
           <span><MapPin size={14} /> Delivering to</span>
-          <strong>Margao, Goa</strong>
+          <strong>{locationText}</strong>
         </div>
         <a href={`tel:${PHONE_NUMBER}`}><Phone size={16} /> Call</a>
       </section>
@@ -37,7 +69,7 @@ export default function Home() {
       <Link to="/menu" className="app-search"><Search size={18} /> Search biryani, starters, catering trays...</Link>
 
       <section className="app-hero-card" style={{ backgroundImage: `linear-gradient(90deg, rgba(17,16,13,.92), rgba(17,16,13,.35)), url(${heroImage})` }}>
-        <p>Ahmad Caterers</p>
+        <p>Delivering to {locationText}</p>
         <h1>Order food or book catering in a few taps.</h1>
         <div>
           <Link className="app-button" to="/menu"><ShoppingBag size={18} /> Order now</Link>
@@ -89,13 +121,13 @@ export default function Home() {
           <Link to="/menu">See all <ChevronRight size={16} /></Link>
         </div>
         <div className="horizontal-food-list">
-          {recommendedDishes.map((food) => (
+          {menuLoading ? <p className="muted-text">Loading menu...</p> : menuError ? <p className="muted-text">{menuError}</p> : recommendedDishes.length ? recommendedDishes.map((food) => (
             <FoodCard food={food} compact key={food.id} />
-          ))}
+          )) : <p className="muted-text">No menu items available yet.</p>}
         </div>
       </section>
 
-      <section className="special-card">
+      {todaysSpecial && <section className="special-card">
         <img src={todaysSpecial.image} alt={todaysSpecial.name} />
         <div>
           <p>Today's Special</p>
@@ -103,7 +135,7 @@ export default function Home() {
           <span>{todaysSpecial.description}</span>
           <Link className="app-button small" to={`/food/${todaysSpecial.id}`}>View dish <ChevronRight size={16} /></Link>
         </div>
-      </section>
+      </section>}
 
       <section className="app-section">
         <div className="section-title-row">
@@ -114,9 +146,9 @@ export default function Home() {
           <Link to="/menu">Order <ChevronRight size={16} /></Link>
         </div>
         <div className="horizontal-food-list">
-          {(bestSellers.length ? bestSellers : popularDishes).map((food) => (
+          {popularDishes.length ? popularDishes.map((food) => (
             <FoodCard food={food} compact key={food.id} />
-          ))}
+          )) : <p className="muted-text">No best sellers available yet.</p>}
         </div>
       </section>
 

@@ -3,7 +3,6 @@ import { useSearchParams } from "react-router-dom";
 import { Search, ShieldCheck, Utensils } from "../components/icons.jsx";
 import FoodCard from "../components/FoodCard.jsx";
 import { categoryData } from "../data/categoryData.js";
-import { foodData } from "../data/foodData.js";
 import { menuService } from "../../services/menuService.js";
 
 export default function Menu() {
@@ -13,7 +12,7 @@ export default function Menu() {
   const [query, setQuery] = useState("");
   const [foodType, setFoodType] = useState("All");
   const [sortBy, setSortBy] = useState("Popular");
-  const [menuItems, setMenuItems] = useState(foodData);
+  const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -36,12 +35,12 @@ export default function Menu() {
       })
       .then((items) => {
         if (!isMounted) return;
-        setMenuItems(items.length ? items : []);
+        setMenuItems(items);
       })
       .catch((err) => {
         if (!isMounted) return;
         setError(err.message || "Unable to load menu right now.");
-        setMenuItems(foodData);
+        setMenuItems([]);
       })
       .finally(() => {
         if (isMounted) setLoading(false);
@@ -115,7 +114,7 @@ export default function Menu() {
         ) : error ? (
           <div className="app-card empty-order-tab">
             <Utensils size={34} />
-            <h2>Showing demo menu</h2>
+            <h2>Menu unavailable</h2>
             <p>{error}</p>
           </div>
         ) : filteredFood.length ? (
@@ -129,7 +128,6 @@ export default function Menu() {
             <p>Add menu items from admin later.</p>
           </div>
         )}
-        {!loading && error && foodData.map((food) => <FoodCard food={food} key={food.id} />)}
       </section>
     </div>
   );

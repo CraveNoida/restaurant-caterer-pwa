@@ -37,6 +37,7 @@ const orderSchema = new mongoose.Schema(
     },
     deliveryAddress: { type: String, trim: true },
     houseDetails: { type: String, trim: true },
+    rawDetectedAddress: { type: String, trim: true },
     landmark: { type: String, trim: true },
     customerLocation: {
       lat: Number,

@@ -40,6 +40,23 @@ function formatNominatimAddress(address = {}) {
   ].filter(Boolean).join(", ");
 }
 
+export function formatDetectedAddress(rawAddress, address = {}) {
+  const area = address.neighbourhood || address.suburb || address.city_district || address.road || address.quarter;
+  const city = address.city || address.town || address.village || address.municipality || address.county;
+  const clean = [area, city, address.state, address.postcode, address.country]
+    .filter(Boolean)
+    .filter((part, index, list) => list.findIndex((item) => item.toLowerCase() === part.toLowerCase()) === index)
+    .join(", ");
+
+  if (clean) return clean;
+  return String(rawAddress || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(-5)
+    .join(", ");
+}
+
 export async function reverseGeocode(lat, lng) {
   if (!hasLocation({ lat, lng })) throw new Error("Invalid location");
 
@@ -55,7 +72,7 @@ export async function reverseGeocode(lat, lng) {
     const data = await response.json();
     const address = data.results?.[0]?.formatted_address;
     if (data.status !== "OK" || !address) throw new Error("Google reverse geocoding returned no address");
-    return address;
+    return { address, rawAddress: address };
   }
 
   const url = new URL("https://nominatim.openstreetmap.org/reverse");
@@ -71,9 +88,10 @@ export async function reverseGeocode(lat, lng) {
   if (!response.ok) throw new Error("OpenStreetMap reverse geocoding failed");
 
   const data = await response.json();
-  const address = data.display_name || formatNominatimAddress(data.address);
+  const rawAddress = data.display_name || formatNominatimAddress(data.address);
+  const address = formatDetectedAddress(rawAddress, data.address);
   if (!address) throw new Error("OpenStreetMap reverse geocoding returned no address");
-  return address;
+  return { address, rawAddress };
 }
 
 export function formatAccuracy(location) {

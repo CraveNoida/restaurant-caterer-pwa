@@ -1,10 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   Bike,
-  CalendarClock,
-  Clock,
   CreditCard,
   MapPin,
   PackageCheck,
@@ -16,44 +14,28 @@ import BillSummary from "../components/BillSummary.jsx";
 import { calculateCartTotals } from "../../utils/orderUtils.js";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { paymentService } from "../../services/paymentService.js";
 import { formatAccuracy, googleMapsUrl, reverseGeocode } from "../../utils/mapUtils.js";
-
-function loadRazorpayScript() {
-  if (window.Razorpay) return Promise.resolve(true);
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-}
+import { saveCustomerLocation } from "../../utils/customerLocation.js";
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, placeOrder, clearCart } = useCart();
+  const { items, placeOrder } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [errors, setErrors] = useState({});
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [locationNotice, setLocationNotice] = useState(null);
-  const paymentLockRef = useRef(false);
-  const pendingRazorpayOrderRef = useRef(null);
   const [form, setForm] = useState({
     name: "",
     phone: "",
-    email: "",
     address: "",
     houseDetails: "",
     landmark: "",
     deliveryLocation: null,
+    rawDetectedAddress: "",
     fulfillment: "Delivery",
-    deliveryTime: "ASAP",
-    scheduledTime: "",
     notes: "",
-    paymentMethod: "Cash on Delivery",
-    transactionId: ""
+    paymentMethod: "Cash on Delivery"
   });
 
   useEffect(() => {
@@ -66,7 +48,6 @@ export default function Checkout() {
         ...current,
         name: current.name || user.name || "",
         phone: current.phone || user.phone || "",
-        email: current.email || user.email || "",
         address: current.address || addressText,
         landmark: current.landmark || defaultAddress?.landmark || ""
       }));
@@ -83,9 +64,7 @@ export default function Checkout() {
     if (!form.name.trim()) nextErrors.name = "Name is required.";
     if (!/^[6-9]\d{9}$/.test(phoneDigits)) nextErrors.phone = "Enter a valid 10 digit Indian mobile number.";
     if (form.fulfillment === "Delivery" && !form.address.trim()) nextErrors.address = "Address is required for delivery.";
-    if (form.deliveryTime === "Schedule" && !form.scheduledTime) nextErrors.scheduledTime = "Choose a schedule date and time.";
     if (!form.paymentMethod) nextErrors.paymentMethod = "Select a payment method.";
-    if (form.paymentMethod === "UPI" && !form.transactionId.trim()) nextErrors.transactionId = "Enter your UPI transaction ID after payment.";
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -124,12 +103,16 @@ export default function Checkout() {
         setForm((current) => ({ ...current, deliveryLocation }));
 
         try {
-          const detectedAddress = await reverseGeocode(coords.latitude, coords.longitude);
+          const detected = await reverseGeocode(coords.latitude, coords.longitude);
+          const detectedAddress = typeof detected === "string" ? detected : detected.address;
+          const rawDetectedAddress = typeof detected === "string" ? detected : detected.rawAddress;
           setForm((current) => ({
             ...current,
             address: detectedAddress,
+            rawDetectedAddress,
             deliveryLocation
           }));
+          saveCustomerLocation({ address: detectedAddress, rawDetectedAddress, deliveryLocation });
           setErrors((current) => ({ ...current, address: undefined }));
           setLocationNotice({
             type: "success",
@@ -171,108 +154,36 @@ export default function Checkout() {
     );
   };
 
-  const verifyRazorpayPayment = (providerOrder, order) => new Promise((resolve, reject) => {
-    const key = providerOrder.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID;
-    if (providerOrder.providerOrder.localPlaceholder && !key) {
-      paymentService.verify({
-        razorpay_order_id: providerOrder.providerOrder.id,
-        razorpay_payment_id: `pay_dev_${order.orderId}`,
-        razorpay_signature: "local_signature"
-      }).then(resolve).catch(reject);
-      return;
-    }
-
-    if (!key) {
-      reject(new Error("Razorpay key is not configured yet. Please choose COD or UPI for now."));
-      return;
-    }
-
-    const checkout = new window.Razorpay({
-      key,
-      amount: providerOrder.providerOrder.amount,
-      currency: providerOrder.providerOrder.currency || "INR",
-      name: "Ahmad Caterers",
-      description: `Payment for ${order.orderId}`,
-      order_id: providerOrder.providerOrder.id,
-      prefill: {
-        name: form.name,
-        contact: form.phone,
-        email: form.email
-      },
-      handler: async (response) => {
-        try {
-          await paymentService.verify({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
-          });
-          resolve(response);
-        } catch (error) {
-          reject(error);
-        }
-      },
-      modal: {
-        ondismiss: () => {
-          reject(new Error("Payment was cancelled. Your order is saved with payment pending."));
-        }
-      }
-    });
-    checkout.on?.("payment.failed", () => {
-      reject(new Error("Payment failed. Please try again or choose COD/UPI."));
-    });
-    checkout.open();
-  });
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!validateForm() || isPlacingOrder || paymentLockRef.current) return;
+    if (!validateForm() || isPlacingOrder) return;
     if (!isAuthenticated) {
       setErrors({ form: "Please login or register before placing an order." });
       return;
     }
 
     setIsPlacingOrder(true);
-    paymentLockRef.current = true;
     try {
-      const isRazorpay = form.paymentMethod === "Razorpay Online";
-      const order = isRazorpay && pendingRazorpayOrderRef.current
-        ? pendingRazorpayOrderRef.current
-        : await placeOrder({
+      const order = await placeOrder({
           ...form,
           name: form.name.trim(),
           phone: form.phone.trim(),
-          email: form.email.trim(),
+          email: user?.email || "",
           address: form.address.trim(),
           houseDetails: form.houseDetails.trim(),
           landmark: form.landmark.trim(),
           deliveryLocation: form.deliveryLocation,
+          rawDetectedAddress: form.rawDetectedAddress,
           notes: form.notes.trim(),
-          transactionId: form.transactionId.trim(),
-          clearCartOnSuccess: !isRazorpay
+          transactionId: "",
+          clearCartOnSuccess: true
         });
-
-      if (isRazorpay) {
-        pendingRazorpayOrderRef.current = order;
-        const providerOrder = await paymentService.createOrder({
-          orderId: order.orderId,
-          amount: order.totalAmount,
-          paymentMethod: "Razorpay"
-        });
-        if (!providerOrder.providerOrder?.localPlaceholder) {
-          const scriptReady = await loadRazorpayScript();
-          if (!scriptReady) throw new Error("Could not load Razorpay checkout. Please try again.");
-        }
-        await verifyRazorpayPayment(providerOrder, order);
-        pendingRazorpayOrderRef.current = null;
-        clearCart();
-      }
 
       navigate(`/order-success?orderId=${order.orderId}`);
     } catch (error) {
       setErrors({ form: error.message || "Could not place your order. Please try again." });
     } finally {
       setIsPlacingOrder(false);
-      paymentLockRef.current = false;
     }
   };
 
@@ -298,7 +209,6 @@ export default function Checkout() {
         {[
           ["Contact", UserRound],
           ["Address", MapPin],
-          ["Time", CalendarClock],
           ["Payment", CreditCard]
         ].map(([step, Icon], index) => (
           <div className="active" key={step}>
@@ -309,8 +219,8 @@ export default function Checkout() {
       </section>
 
       <section className="checkout-step app-card form-card">
-        <span className="step-label">Step 1</span>
-        <h1><UserRound size={22} /> Contact Details</h1>
+        <span className="step-label">Contact</span>
+        <h1><UserRound size={22} /> Your Details</h1>
         <label>
           Name
           <input required value={form.name} onChange={(event) => updateField("name", event.target.value)} />
@@ -321,14 +231,10 @@ export default function Checkout() {
           <input required inputMode="tel" value={form.phone} onChange={(event) => updateField("phone", event.target.value)} />
           {errors.phone && <small className="field-error">{errors.phone}</small>}
         </label>
-        <label>
-          Email optional
-          <input type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} />
-        </label>
       </section>
 
       <section className="checkout-step app-card form-card">
-        <span className="step-label">Step 2</span>
+        <span className="step-label">Address</span>
         <h2><MapPin size={21} /> Delivery Details</h2>
         <div className="segmented-control">
           {[["Delivery", Bike], ["Pickup", PackageCheck]].map(([option, Icon]) => (
@@ -344,10 +250,6 @@ export default function Checkout() {
         </div>
         {form.fulfillment === "Delivery" ? (
           <>
-            <div className="saved-address-card">
-              <strong>Saved address</strong>
-              <span>Home address placeholder - add login and backend later.</span>
-            </div>
             <label>
               Address
               <small className="field-helper">Please enter your complete address. GPS helps our delivery partner find you faster.</small>
@@ -402,32 +304,9 @@ export default function Checkout() {
       </section>
 
       <section className="checkout-step app-card form-card">
-        <span className="step-label">Step 3</span>
-        <h2><Clock size={21} /> Delivery Time</h2>
-        <div className="segmented-control">
-          {["ASAP", "Schedule"].map((option) => (
-            <button key={option} type="button" className={form.deliveryTime === option ? "active" : ""} onClick={() => updateField("deliveryTime", option)}>
-              <Clock size={17} /> {option}
-            </button>
-          ))}
-        </div>
-        {form.deliveryTime === "Schedule" && (
-          <label>
-            Schedule time
-            <input type="datetime-local" value={form.scheduledTime} onChange={(event) => updateField("scheduledTime", event.target.value)} />
-            {errors.scheduledTime && <small className="field-error">{errors.scheduledTime}</small>}
-          </label>
-        )}
-        <label>
-          Order notes
-          <textarea value={form.notes} onChange={(event) => updateField("notes", event.target.value)} />
-        </label>
-      </section>
-
-      <section className="checkout-step app-card form-card">
-        <span className="step-label">Step 4</span>
+        <span className="step-label">Payment</span>
         <h2><CreditCard size={21} /> Payment Method</h2>
-        {[["Cash on Delivery", Wallet], ["UPI", CreditCard], ["Razorpay Online", CreditCard]].map(([method, Icon]) => (
+        {[["Cash on Delivery", Wallet], ["UPI", CreditCard]].map(([method, Icon]) => (
           <label className="radio-row" key={method}>
             <input
               type="radio"
@@ -443,22 +322,14 @@ export default function Checkout() {
           <div className="payment-instructions">
             <strong>Manual UPI payment</strong>
             <span>Pay to UPI ID: ahmadcaterers@upi</span>
-            <small>QR code placeholder will be added when the restaurant shares the final QR.</small>
-            <label>
-              UPI transaction ID
-              <input value={form.transactionId} onChange={(event) => updateField("transactionId", event.target.value)} placeholder="Example: UPI123456789" />
-              {errors.transactionId && <small className="field-error">{errors.transactionId}</small>}
-            </label>
-          </div>
-        )}
-        {form.paymentMethod === "Razorpay Online" && (
-          <div className="payment-instructions">
-            <strong>Online payment</strong>
-            <span>Place order to open Razorpay checkout securely.</span>
-            <small>If the payment is cancelled, the order payment status will be marked failed.</small>
+            <small>Keep your UPI confirmation ready. The restaurant may verify it by phone.</small>
           </div>
         )}
         {errors.paymentMethod && <small className="field-error">{errors.paymentMethod}</small>}
+        <label>
+          Order notes optional
+          <textarea value={form.notes} onChange={(event) => updateField("notes", event.target.value)} />
+        </label>
       </section>
 
       <BillSummary totals={checkoutTotals} />
@@ -468,7 +339,7 @@ export default function Checkout() {
           <small>Payable amount</small>
           <strong>{formatCurrency(checkoutTotals.grandTotal)}</strong>
         </span>
-        <em>{isPlacingOrder ? "Processing..." : form.paymentMethod === "Razorpay Online" ? "Pay Online" : "Place Order"} <ArrowRight size={18} /></em>
+        <em>{isPlacingOrder ? "Processing..." : "Place Order"} <ArrowRight size={18} /></em>
       </button>
     </form>
   );

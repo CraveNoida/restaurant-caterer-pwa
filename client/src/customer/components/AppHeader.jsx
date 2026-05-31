@@ -1,6 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, Search, UserRound } from "./icons.jsx";
 import logoImage from "../../assets/images/logo-site.png";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { getDefaultCustomerLocation } from "../../utils/customerLocation.js";
 
 const pageTitles = {
   "/": "Ahmad Caterers",
@@ -17,6 +19,7 @@ const pageTitles = {
 export default function AppHeader() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const isHome = location.pathname === "/";
   const title = location.pathname.startsWith("/track-order")
     ? "Track Order"
@@ -25,6 +28,8 @@ export default function AppHeader() {
       : pageTitles[location.pathname] || "Ahmad Caterers";
   const showSearch = location.pathname === "/";
   const searchText = "Search biryani, starters, catering trays";
+  const savedLocation = getDefaultCustomerLocation(user);
+  const subtitle = savedLocation || (isAuthenticated ? "Set delivery location" : "Detect your location");
 
   const goBack = () => {
     if (window.history.state?.idx > 0) {
@@ -46,7 +51,7 @@ export default function AppHeader() {
           {isHome && <img src={logoImage} alt="Ahmad Caterers" />}
           <span>
             <strong>{title}</strong>
-            <small><MapPin size={13} /> Margao, Goa</small>
+            <small><MapPin size={13} /> {subtitle}</small>
           </span>
         </Link>
         <Link to="/profile" className="header-avatar" aria-label="Open profile">

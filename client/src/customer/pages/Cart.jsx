@@ -1,20 +1,21 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Clock, MapPin, PackageCheck, Phone, Plus, ShoppingBag, Tag, Trash2, Truck } from "../components/icons.jsx";
+import { ArrowLeft, ArrowRight, MapPin, PackageCheck, Phone, ShoppingBag, Trash2, Truck } from "../components/icons.jsx";
 import { useCart } from "../../context/CartContext.jsx";
 import BillSummary from "../components/BillSummary.jsx";
 import CartItem from "../components/CartItem.jsx";
-import FoodCard from "../components/FoodCard.jsx";
-import { recommendedDishes } from "../data/foodData.js";
 import { useState } from "react";
 import { calculateCartTotals } from "../../utils/orderUtils.js";
 import { formatCurrency } from "../../utils/formatCurrency.js";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { getDefaultCustomerLocation } from "../../utils/customerLocation.js";
 
 export default function Cart() {
   const { items, totals, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const [fulfillment, setFulfillment] = useState("Delivery");
-  const [schedule, setSchedule] = useState("");
   const navigate = useNavigate();
   const cartTotals = calculateCartTotals(items, { orderType: fulfillment });
+  const locationText = getDefaultCustomerLocation(user) || (isAuthenticated ? "Set delivery location" : "Detect your location");
 
   if (!items.length) {
     return (
@@ -46,7 +47,7 @@ export default function Cart() {
         <div>
           <MapPin size={22} />
           <span>Delivering to</span>
-          <strong>Margao, Goa</strong>
+          <strong>{locationText}</strong>
         </div>
         <a href="tel:+918788611511"><Phone size={16} /> Call kitchen</a>
       </section>
@@ -69,37 +70,6 @@ export default function Cart() {
             <button key={option} type="button" className={fulfillment === option ? "active" : ""} onClick={() => setFulfillment(option)}>
               {option === "Delivery" ? <ShoppingBag size={16} /> : <PackageCheck size={16} />} {option}
             </button>
-          ))}
-        </div>
-        <label className="input-with-icon">
-          <Clock size={17} />
-          <input type="datetime-local" value={schedule} onChange={(event) => setSchedule(event.target.value)} aria-label="Schedule order" />
-        </label>
-        <small className="muted-text">Schedule is a placeholder for now and will be passed to checkout after backend wiring.</small>
-      </section>
-      <section className="app-card add-ons-card">
-        <h2><Plus size={18} /> Suggested add-ons</h2>
-        <div>
-          {["Cold drink", "Dessert", "Extra raita", "Salad"].map((addon) => (
-            <button type="button" key={addon}><Plus size={14} /> {addon}</button>
-          ))}
-        </div>
-      </section>
-      <section className="coupon-box">
-        <span><Tag size={17} /> Coupon</span>
-        <input placeholder="Apply coupon code" />
-        <small className="muted-text">Promo code support is ready for backend rules.</small>
-      </section>
-      <section className="app-section">
-        <div className="section-title-row">
-          <div>
-            <p>Complete your meal</p>
-            <h2>You may also like</h2>
-          </div>
-        </div>
-        <div className="horizontal-food-list">
-          {recommendedDishes.slice(0, 3).map((food) => (
-            <FoodCard food={food} compact key={food.id} />
           ))}
         </div>
       </section>

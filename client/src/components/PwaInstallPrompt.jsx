@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { getPwaAppConfig } from "../utils/pwaAppConfig.js";
 
 function isStandalone() {
@@ -7,8 +6,7 @@ function isStandalone() {
 }
 
 export default function PwaInstallPrompt() {
-  const location = useLocation();
-  const pwaConfig = getPwaAppConfig(location.pathname);
+  const pwaConfig = getPwaAppConfig();
   const [installEvent, setInstallEvent] = useState(null);
   const [canInstall, setCanInstall] = useState(false);
   const [isOffline, setIsOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);

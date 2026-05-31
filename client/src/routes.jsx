@@ -33,8 +33,57 @@ import AssignedOrders from "./delivery/pages/AssignedOrders.jsx";
 import DeliveryOrderDetails from "./delivery/pages/DeliveryOrderDetails.jsx";
 import CompletedDeliveries from "./delivery/pages/CompletedDeliveries.jsx";
 import DeliveryProfile from "./delivery/pages/DeliveryProfile.jsx";
+import { getAppMode } from "./utils/appMode.js";
 
 export default function AppRoutes() {
+  const appMode = getAppMode();
+
+  if (appMode === "admin") {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/admin/login" replace />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="menu" element={<MenuManagement />} />
+            <Route path="bookings" element={<CateringBookings />} />
+            <Route path="catering-bookings" element={<Navigate to="/admin/bookings" replace />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="delivery-boys" element={<DeliveryBoys />} />
+            <Route path="payments" element={<Payments />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Route>
+        <Route path="*" element={<Navigate to="/admin/login" replace />} />
+      </Routes>
+    );
+  }
+
+  if (appMode === "delivery") {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="/delivery/login" replace />} />
+        <Route path="/delivery/login" element={<DeliveryLogin />} />
+        <Route element={<ProtectedRoute allowedRoles={["delivery"]} />}>
+          <Route path="/delivery" element={<DeliveryLayout />}>
+            <Route index element={<Navigate to="/delivery/dashboard" replace />} />
+            <Route path="dashboard" element={<DeliveryDashboard />} />
+            <Route path="orders" element={<AssignedOrders />} />
+            <Route path="assigned-orders" element={<Navigate to="/delivery/orders" replace />} />
+            <Route path="orders/:id" element={<DeliveryOrderDetails />} />
+            <Route path="completed" element={<CompletedDeliveries />} />
+            <Route path="profile" element={<DeliveryProfile />} />
+          </Route>
+        </Route>
+        <Route path="*" element={<Navigate to="/delivery/login" replace />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       <Route element={<CustomerLayout />}>

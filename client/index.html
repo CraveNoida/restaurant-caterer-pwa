@@ -13,8 +13,9 @@
     <link id="pwa-manifest" rel="manifest" href="/manifest.json" />
     <script>
       (() => {
-        const path = window.location.pathname;
-        const config = path.startsWith("/admin")
+        const rawMode = "%VITE_APP_MODE%";
+        const appMode = ["customer", "admin", "delivery"].includes(rawMode) ? rawMode : "customer";
+        const config = appMode === "admin"
           ? {
               appType: "admin",
               manifest: "/admin-manifest.json",
@@ -22,7 +23,7 @@
               title: "Ahmad Admin",
               icon: "/icons/admin-icon-192.png"
             }
-          : path.startsWith("/delivery")
+          : appMode === "delivery"
             ? {
                 appType: "delivery",
                 manifest: "/delivery-manifest.json",

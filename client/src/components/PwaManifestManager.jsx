@@ -16,7 +16,7 @@ export default function PwaManifestManager() {
   const location = useLocation();
 
   useLayoutEffect(() => {
-    const config = getPwaAppConfig(location.pathname);
+    const config = getPwaAppConfig();
     let manifestLink = document.querySelector('link[rel="manifest"]');
     let iconLink = document.querySelector('link[rel="icon"]');
     let appleIconLink = document.querySelector('link[rel="apple-touch-icon"]');

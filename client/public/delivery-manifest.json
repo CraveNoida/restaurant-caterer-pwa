@@ -1,10 +1,10 @@
 {
   "name": "Ahmad Delivery",
   "short_name": "Delivery",
-  "id": "/delivery/",
+  "id": "/",
   "description": "Delivery partner app for assigned orders, delivery status, and GPS tracking",
   "start_url": "/delivery/login",
-  "scope": "/delivery/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f4f7fb",

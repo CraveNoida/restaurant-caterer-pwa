@@ -1,10 +1,10 @@
 {
   "name": "Ahmad Caterers Admin",
   "short_name": "Admin",
-  "id": "/admin/",
+  "id": "/",
   "description": "Admin dashboard for managing orders, menu, bookings, customers, payments, and delivery",
   "start_url": "/admin/login",
-  "scope": "/admin/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f6f7fb",

@@ -1,3 +1,5 @@
+import { getAppMode } from "./appMode.js";
+
 const PWA_APPS = {
   customer: {
     appType: "customer",
@@ -31,8 +33,6 @@ const PWA_APPS = {
   }
 };
 
-export function getPwaAppConfig(pathname = "/") {
-  if (pathname.startsWith("/admin")) return PWA_APPS.admin;
-  if (pathname.startsWith("/delivery")) return PWA_APPS.delivery;
-  return PWA_APPS.customer;
+export function getPwaAppConfig() {
+  return PWA_APPS[getAppMode()] || PWA_APPS.customer;
 }

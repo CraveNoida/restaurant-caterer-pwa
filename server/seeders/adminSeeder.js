@@ -16,7 +16,14 @@ async function seedAdmin() {
   });
 
   if (existingAdmin) {
-    console.log(`Admin already exists: ${existingAdmin.email || existingAdmin.phone}`);
+    existingAdmin.name = admin.name;
+    existingAdmin.phone = admin.phone;
+    existingAdmin.email = admin.email;
+    existingAdmin.password = admin.password;
+    existingAdmin.role = "admin";
+    existingAdmin.isActive = true;
+    await existingAdmin.save();
+    console.log(`Admin updated: ${existingAdmin.email || existingAdmin.phone}`);
     await connection.disconnect();
     return;
   }

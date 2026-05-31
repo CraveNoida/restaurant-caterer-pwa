@@ -18,6 +18,8 @@ export default function PwaManifestManager() {
   useEffect(() => {
     const config = getPwaAppConfig(location.pathname);
     let manifestLink = document.querySelector('link[rel="manifest"]');
+    let iconLink = document.querySelector('link[rel="icon"]');
+    let appleIconLink = document.querySelector('link[rel="apple-touch-icon"]');
 
     if (!manifestLink) {
       manifestLink = document.createElement("link");
@@ -25,7 +27,21 @@ export default function PwaManifestManager() {
       document.head.appendChild(manifestLink);
     }
 
+    if (!iconLink) {
+      iconLink = document.createElement("link");
+      iconLink.setAttribute("rel", "icon");
+      document.head.appendChild(iconLink);
+    }
+
+    if (!appleIconLink) {
+      appleIconLink = document.createElement("link");
+      appleIconLink.setAttribute("rel", "apple-touch-icon");
+      document.head.appendChild(appleIconLink);
+    }
+
     manifestLink.setAttribute("href", config.manifestHref);
+    iconLink.setAttribute("href", config.iconHref);
+    appleIconLink.setAttribute("href", config.iconHref);
     ensureMeta("theme-color").setAttribute("content", config.themeColor);
     ensureMeta("apple-mobile-web-app-title").setAttribute("content", config.appleTitle);
   }, [location.pathname]);

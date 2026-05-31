@@ -15,10 +15,17 @@ export default function PwaInstallPrompt() {
   const [installed, setInstalled] = useState(() => typeof window !== "undefined" && isStandalone());
 
   useEffect(() => {
-    const handleBeforeInstall = (event) => {
-      event.preventDefault();
+    const applyInstallEvent = (event) => {
       setInstallEvent(event);
       setCanInstall(!isStandalone());
+    };
+    const handleBeforeInstall = (event) => {
+      event.preventDefault();
+      window.__pwaInstallPromptEvent = event;
+      applyInstallEvent(event);
+    };
+    const handleInstallAvailable = () => {
+      if (window.__pwaInstallPromptEvent) applyInstallEvent(window.__pwaInstallPromptEvent);
     };
     const handleInstalled = () => {
       setCanInstall(false);
@@ -28,13 +35,16 @@ export default function PwaInstallPrompt() {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
 
+    if (window.__pwaInstallPromptEvent) applyInstallEvent(window.__pwaInstallPromptEvent);
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    window.addEventListener("pwa-install-available", handleInstallAvailable);
     window.addEventListener("appinstalled", handleInstalled);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("pwa-install-available", handleInstallAvailable);
       window.removeEventListener("appinstalled", handleInstalled);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);

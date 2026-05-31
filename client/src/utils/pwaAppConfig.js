@@ -1,6 +1,7 @@
 const PWA_APPS = {
   customer: {
     manifestHref: "/manifest.json",
+    iconHref: "/icons/icon-192.png",
     themeColor: "#15110d",
     appleTitle: "Ahmad Caterers",
     title: "Install Ahmad Caterers App",
@@ -8,6 +9,7 @@ const PWA_APPS = {
   },
   admin: {
     manifestHref: "/admin-manifest.json",
+    iconHref: "/icons/admin-icon-192.png",
     themeColor: "#111827",
     appleTitle: "Ahmad Admin",
     title: "Install Admin App",
@@ -15,6 +17,7 @@ const PWA_APPS = {
   },
   delivery: {
     manifestHref: "/delivery-manifest.json",
+    iconHref: "/icons/delivery-icon-192.png",
     themeColor: "#0f766e",
     appleTitle: "Ahmad Delivery",
     title: "Install Delivery App",

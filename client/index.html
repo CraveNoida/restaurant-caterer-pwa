@@ -8,6 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Ahmad Caterers" />
+    <link id="pwa-icon" rel="icon" href="/icons/icon-192.png" />
+    <link id="pwa-apple-icon" rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link id="pwa-manifest" rel="manifest" href="/manifest.json" />
     <script>
       (() => {
         const path = window.location.pathname;
@@ -32,18 +35,17 @@
                 icon: "/icons/icon-192.png"
               };
 
-        const addLink = (rel, href) => {
-          const link = document.createElement("link");
-          link.setAttribute("rel", rel);
-          link.setAttribute("href", href);
-          document.head.appendChild(link);
-        };
-
         document.querySelector('meta[name="theme-color"]')?.setAttribute("content", config.theme);
         document.querySelector('meta[name="apple-mobile-web-app-title"]')?.setAttribute("content", config.title);
-        addLink("icon", config.icon);
-        addLink("apple-touch-icon", config.icon);
-        addLink("manifest", config.manifest);
+        document.querySelector("#pwa-icon")?.setAttribute("href", config.icon);
+        document.querySelector("#pwa-apple-icon")?.setAttribute("href", config.icon);
+        document.querySelector("#pwa-manifest")?.setAttribute("href", config.manifest);
+
+        window.addEventListener("beforeinstallprompt", (event) => {
+          event.preventDefault();
+          window.__pwaInstallPromptEvent = event;
+          window.dispatchEvent(new Event("pwa-install-available"));
+        });
       })();
     </script>
     <title>Ahmad Caterers</title>

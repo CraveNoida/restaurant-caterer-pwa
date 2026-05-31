@@ -83,6 +83,45 @@ body {
   padding: 0 14px;
 }
 
+.pwa-status-banner span {
+  display: grid;
+  gap: 2px;
+}
+
+.pwa-status-banner small {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.78;
+}
+
+.pwa-status-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.pwa-status-banner .pwa-secondary-action {
+  border: 1px solid #b7e4d8;
+  background: #fff;
+  color: #17312d;
+}
+
+@media (max-width: 560px) {
+  .pwa-status-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pwa-status-actions {
+    width: 100%;
+  }
+
+  .pwa-status-actions button {
+    flex: 1 1 0;
+  }
+}
+
 a {
   color: inherit;
 }

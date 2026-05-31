@@ -1,13 +1,14 @@
 {
   "name": "Ahmad Caterers",
   "short_name": "Ahmad",
-  "description": "Order food, book catering, and track deliveries from Ahmad Caterers.",
+  "id": "/",
+  "description": "Customer food ordering and catering booking app",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#fffaf2",
-  "theme_color": "#0f766e",
+  "background_color": "#fff8ee",
+  "theme_color": "#15110d",
   "icons": [
     {
       "src": "/icons/icon-192.png",

@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { getPwaAppConfig } from "../utils/pwaAppConfig.js";
 
 function isStandalone() {
   return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
 }
 
 export default function PwaInstallPrompt() {
+  const location = useLocation();
+  const pwaConfig = getPwaAppConfig(location.pathname);
   const [installEvent, setInstallEvent] = useState(null);
   const [canInstall, setCanInstall] = useState(false);
   const [isOffline, setIsOffline] = useState(() => typeof navigator !== "undefined" && !navigator.onLine);
@@ -56,8 +60,16 @@ export default function PwaInstallPrompt() {
         <span>You are offline. Saved cart data remains available, but live updates and new orders need internet.</span>
       ) : canInstall ? (
         <>
-          <span>Install Ahmad Caterers for a faster app-like experience.</span>
-          <button type="button" onClick={installApp}>Install app</button>
+          <span>
+            <strong>{pwaConfig.title}</strong>
+            <small>{pwaConfig.subtitle}</small>
+          </span>
+          <div className="pwa-status-actions">
+            <button type="button" onClick={installApp}>Install App</button>
+            <button type="button" className="pwa-secondary-action" onClick={() => setCanInstall(false)}>
+              Maybe Later
+            </button>
+          </div>
         </>
       ) : null}
     </div>

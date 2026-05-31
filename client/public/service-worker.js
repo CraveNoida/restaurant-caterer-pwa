@@ -1,4 +1,4 @@
-const CACHE_NAME = "ahmad-caterers-pwa-v9";
+const CACHE_NAME = "ahmad-caterers-pwa-v10";
 const OFFLINE_URL = "/offline.html";
 const APP_SHELL_URL = "/index.html";
 const PRECACHE_URLS = [
@@ -6,11 +6,21 @@ const PRECACHE_URLS = [
   APP_SHELL_URL,
   OFFLINE_URL,
   "/manifest.json",
+  "/admin-manifest.json",
+  "/delivery-manifest.json",
   "/logo-site.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/maskable-icon-192.png",
-  "/icons/maskable-icon-512.png"
+  "/icons/maskable-icon-512.png",
+  "/icons/admin-icon-192.png",
+  "/icons/admin-icon-512.png",
+  "/icons/admin-maskable-icon-192.png",
+  "/icons/admin-maskable-icon-512.png",
+  "/icons/delivery-icon-192.png",
+  "/icons/delivery-icon-512.png",
+  "/icons/delivery-maskable-icon-192.png",
+  "/icons/delivery-maskable-icon-512.png"
 ];
 function isApiOrRealtimeRequest(url) {
   return url.pathname.startsWith("/api") || url.pathname.startsWith("/socket.io");

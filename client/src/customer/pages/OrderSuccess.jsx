@@ -6,7 +6,6 @@ import { formatOrderWhatsAppMessage, getStatusLabel } from "../../utils/orderUti
 import { PHONE_NUMBER, WHATSAPP_NUMBER } from "../components/homeData.js";
 import { useEffect, useState } from "react";
 import { orderService } from "../../services/orderService.js";
-import { googleMapsUrl } from "../../utils/mapUtils.js";
 
 export default function OrderSuccess() {
   const [params] = useSearchParams();
@@ -63,7 +62,6 @@ export default function OrderSuccess() {
   }
 
   const message = formatOrderWhatsAppMessage(order, formatCurrency);
-  const customerMapsUrl = googleMapsUrl(order.customerLocation);
 
   return (
     <div className="app-screen success-screen">
@@ -115,7 +113,6 @@ export default function OrderSuccess() {
 
       <div className="button-stack">
         <Link className="app-button full-width" to={`/track-order/${order.orderId}`}><MapPinned size={18} /> Track Order</Link>
-        {customerMapsUrl && <a className="app-button outline full-width" href={customerMapsUrl} target="_blank" rel="noreferrer"><MapPinned size={18} /> Open customer location in Maps</a>}
         <Link className="app-button outline full-width" to="/my-orders"><ReceiptText size={18} /> View My Orders</Link>
         <a className="app-button outline full-width" href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`} target="_blank" rel="noreferrer">
           <MessageCircle size={18} /> WhatsApp Confirmation

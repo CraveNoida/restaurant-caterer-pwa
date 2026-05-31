@@ -7,7 +7,7 @@ import DeliveryConfirm from "../components/DeliveryConfirm.jsx";
 import DeliveryToast from "../components/DeliveryToast.jsx";
 import { joinOrderTracking } from "../../services/socketService.js";
 import { LiveTrackingMap } from "../../components/maps/index.js";
-import { formatAccuracy, googleMapsUrl } from "../../utils/mapUtils.js";
+import { formatAccuracy, googleMapsRouteUrl, googleMapsUrl } from "../../utils/mapUtils.js";
 
 const statusActions = [
   ["picked_up", "Picked up"],
@@ -203,7 +203,7 @@ export default function DeliveryOrderDetails() {
   if (error || !order) return <section className="delivery-state error">{error || "Order not found."}</section>;
 
   const customerLocation = order.customerLocation;
-  const mapsUrl = googleMapsUrl(customerLocation) || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address || "")}`;
+  const mapsUrl = googleMapsRouteUrl(customerLocation) || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address || "")}`;
   const liveLocation = tracking?.deliveryLocation || order.deliveryLocation;
   const trackingInfo = tracking?.deliveryTracking || order.deliveryTracking || {};
   const deliveryMapsUrl = googleMapsUrl(liveLocation);
@@ -223,7 +223,7 @@ export default function DeliveryOrderDetails() {
       <div className="delivery-action-grid">
         <a href={`tel:${phone}`}>Call Customer</a>
         <a href={`https://wa.me/91${phone}?text=${encodeURIComponent(`Hi, I am delivering order ${order.orderId}.`)}`} target="_blank" rel="noreferrer">WhatsApp</a>
-        <a href={mapsUrl} target="_blank" rel="noreferrer">Open Maps</a>
+        <a href={mapsUrl} target="_blank" rel="noreferrer">Open Route in Google Maps</a>
       </div>
       <section className="delivery-detail-card delivery-tracking-card">
         <div className="delivery-tracking-head">
@@ -247,7 +247,7 @@ export default function DeliveryOrderDetails() {
         <div className="delivery-tracking-actions">
           <button type="button" className="start" onClick={startLiveTracking} disabled={trackingInfo.isLive && watchIdRef.current !== null}>Start Live Tracking</button>
           <button type="button" className="stop" onClick={stopLiveTracking} disabled={!trackingInfo.isLive && watchIdRef.current === null}>Stop Live Tracking</button>
-          {customerLocation && <a href={mapsUrl} target="_blank" rel="noreferrer">Open Customer Location</a>}
+          {customerLocation && <a href={mapsUrl} target="_blank" rel="noreferrer">Open Route in Google Maps</a>}
           {deliveryMapsUrl && <a href={deliveryMapsUrl} target="_blank" rel="noreferrer">Open Delivery Location</a>}
         </div>
       </section>

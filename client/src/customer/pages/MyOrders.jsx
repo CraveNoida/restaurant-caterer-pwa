@@ -12,7 +12,6 @@ import {
   normalizeStatus
 } from "../../utils/orderUtils.js";
 import { orderService } from "../../services/orderService.js";
-import { googleMapsUrl } from "../../utils/mapUtils.js";
 
 const tabs = [
   { id: "active", label: "Active", statuses: ACTIVE_ORDER_STATUSES },
@@ -147,7 +146,6 @@ function PremiumOrderCard({ order, onReorder }) {
   const firstItem = order.items[0];
   const itemSummary = order.items.slice(0, 2).map((item) => `${item.quantity} x ${item.name}`).join(", ");
   const extraItems = Math.max(0, order.items.length - 2);
-  const customerMapsUrl = googleMapsUrl(order.customerLocation);
 
   return (
     <article className="premium-order-card">
@@ -171,7 +169,6 @@ function PremiumOrderCard({ order, onReorder }) {
       <div className="premium-order-footer">
         <div className="premium-order-actions">
           <Link to={`/track-order/${order.orderId}`}><MapPin size={17} /> Track</Link>
-          {customerMapsUrl && <a href={customerMapsUrl} target="_blank" rel="noreferrer"><MapPin size={17} /> Maps</a>}
           <button type="button" onClick={() => onReorder(order.items)}><RotateCcw size={17} /> Reorder</button>
           <Link to={`/track-order/${order.orderId}`}><ReceiptText size={17} /> Details</Link>
         </div>

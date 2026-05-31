@@ -1,7 +1,7 @@
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useEffect, useMemo } from "react";
-import { googleMapsUrl, hasLocation, normalizeLocation, RESTAURANT_LOCATION } from "../../utils/mapUtils.js";
+import { hasLocation, normalizeLocation, RESTAURANT_LOCATION } from "../../utils/mapUtils.js";
 
 const markerColors = {
   customer: "#f4a51c",
@@ -61,8 +61,6 @@ export default function LiveTrackingMap({
   }, [customerLocation, deliveryLocation, showRestaurant]);
 
   const center = markers[0]?.location || normalizeLocation(RESTAURANT_LOCATION);
-  const primaryMapsLink = googleMapsUrl(customerLocation) || googleMapsUrl(deliveryLocation) || googleMapsUrl(RESTAURANT_LOCATION);
-
   return (
     <section className={`map-card ${className}`}>
       <div className="map-card-head">
@@ -70,7 +68,6 @@ export default function LiveTrackingMap({
           <span>{title}</span>
           {subtitle && <strong>{subtitle}</strong>}
         </div>
-        {primaryMapsLink && <a href={primaryMapsLink} target="_blank" rel="noreferrer">Open in Google Maps</a>}
       </div>
       {isOffline ? (
         <div className="map-state">Map needs internet. Saved order details remain available.</div>

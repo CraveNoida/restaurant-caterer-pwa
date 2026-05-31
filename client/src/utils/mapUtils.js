@@ -24,6 +24,11 @@ export function googleMapsUrl(location) {
   return `https://www.google.com/maps/search/?api=1&query=${Number(location.lat)},${Number(location.lng)}`;
 }
 
+export function googleMapsRouteUrl(location) {
+  if (!hasLocation(location)) return "";
+  return `https://www.google.com/maps/dir/?api=1&destination=${Number(location.lat)},${Number(location.lng)}`;
+}
+
 export function formatAccuracy(location) {
   const accuracy = Number(location?.accuracy);
   return Number.isFinite(accuracy) ? `Approx. ${Math.round(accuracy)} meters` : "Approximate location";

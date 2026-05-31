@@ -17,7 +17,6 @@ import { calculateCartTotals } from "../../utils/orderUtils.js";
 import { formatCurrency } from "../../utils/formatCurrency.js";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { paymentService } from "../../services/paymentService.js";
-import { LocationPickerMap } from "../../components/maps/index.js";
 import { formatAccuracy, googleMapsUrl } from "../../utils/mapUtils.js";
 
 function loadRazorpayScript() {
@@ -322,7 +321,7 @@ export default function Checkout() {
             </div>
             <label>
               Address
-              <small className="field-helper">Please enter complete address. GPS helps our delivery partner find you faster.</small>
+              <small className="field-helper">Please enter your complete address. GPS helps our delivery partner find you faster.</small>
               <textarea
                 required
                 placeholder="House no., building, street, area"
@@ -346,23 +345,9 @@ export default function Checkout() {
             {form.deliveryLocation && (
               <section className="location-detected-card">
                 <div>
-                  <span>Location detected</span>
-                  <strong>{formatAccuracy(form.deliveryLocation)}</strong>
-                </div>
-                <LocationPickerMap
-                  location={form.deliveryLocation}
-                  onChange={(location) => updateField("deliveryLocation", {
-                    ...location,
-                    mapsLink: googleMapsUrl(location)
-                  })}
-                />
-                <div className="map-action-row">
-                  <a className="app-button outline full-width" href={form.deliveryLocation.mapsLink || googleMapsUrl(form.deliveryLocation)} target="_blank" rel="noreferrer">
-                    Open in Google Maps
-                  </a>
-                  <button className="app-button full-width" type="button" onClick={() => setErrors((current) => ({ ...current, address: undefined }))}>
-                    Use this location
-                  </button>
+                  <span>Location detected successfully</span>
+                  <strong>GPS location saved for delivery</strong>
+                  <small>Accuracy: {formatAccuracy(form.deliveryLocation).toLowerCase()}</small>
                 </div>
               </section>
             )}

@@ -5,7 +5,7 @@ import ConfirmationModal from "../components/ConfirmationModal.jsx";
 import AdminToast from "../components/AdminToast.jsx";
 import { joinOrderTracking } from "../../services/socketService.js";
 import { LiveTrackingMap } from "../../components/maps/index.js";
-import { googleMapsUrl } from "../../utils/mapUtils.js";
+import { googleMapsRouteUrl, googleMapsUrl } from "../../utils/mapUtils.js";
 
 const nextStatus = {
   placed: "accepted",
@@ -111,7 +111,7 @@ export default function Orders() {
   const selectedCustomerLocation = selected?.customerLocation;
   const selectedTrackingInfo = selectedTracking?.deliveryTracking || selected?.deliveryTracking || {};
   const selectedLocationUrl = googleMapsUrl(selectedLocation);
-  const selectedCustomerLocationUrl = googleMapsUrl(selectedCustomerLocation);
+  const selectedCustomerLocationUrl = googleMapsRouteUrl(selectedCustomerLocation);
 
   return (
     <section className="admin-page">
@@ -169,7 +169,7 @@ export default function Orders() {
               title="Order tracking map"
             />
             <div className="admin-map-actions">
-              {selectedCustomerLocationUrl && <a href={selectedCustomerLocationUrl} target="_blank" rel="noreferrer">Open customer location</a>}
+              {selectedCustomerLocationUrl && <a href={selectedCustomerLocationUrl} target="_blank" rel="noreferrer">Open Customer Location in Maps</a>}
               {selectedLocationUrl && <a href={selectedLocationUrl} target="_blank" rel="noreferrer">Open delivery location</a>}
               {!selectedCustomerLocationUrl && !selectedLocationUrl && <span>No map link yet</span>}
             </div>

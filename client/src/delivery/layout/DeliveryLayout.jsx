@@ -1,5 +1,13 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { CheckCircle2, Home, ReceiptText, UserRound } from "../../customer/components/icons.jsx";
+
+const navItems = [
+  { to: "/delivery/dashboard", label: "Dashboard", icon: Home },
+  { to: "/delivery/orders", label: "Orders", icon: ReceiptText },
+  { to: "/delivery/completed", label: "Completed", icon: CheckCircle2 },
+  { to: "/delivery/profile", label: "Profile", icon: UserRound }
+];
 
 export default function DeliveryLayout() {
   const { logout, user } = useAuth();
@@ -8,8 +16,8 @@ export default function DeliveryLayout() {
     <div className="delivery-app">
       <header className="delivery-header">
         <div>
-          <h1>Delivery Panel</h1>
-          <span>{user?.name || "Delivery partner"}</span>
+          <span>Ahmad Delivery</span>
+          <h1>{user?.name || "Delivery partner"}</h1>
         </div>
         <button type="button" onClick={logout}>Logout</button>
       </header>
@@ -17,10 +25,15 @@ export default function DeliveryLayout() {
         <Outlet />
       </main>
       <nav className="delivery-bottom-nav" aria-label="Delivery navigation">
-        <NavLink to="/delivery/dashboard"><span>Dashboard</span></NavLink>
-        <NavLink to="/delivery/orders"><span>Orders</span></NavLink>
-        <NavLink to="/delivery/completed"><span>Completed</span></NavLink>
-        <NavLink to="/delivery/profile"><span>Profile</span></NavLink>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink to={item.to} key={item.to}>
+              <Icon size={18} />
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
       </nav>
     </div>
   );

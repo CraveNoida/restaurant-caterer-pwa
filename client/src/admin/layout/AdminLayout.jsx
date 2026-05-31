@@ -2,6 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar.jsx";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { ReceiptText, Search, UserRound } from "../../customer/components/icons.jsx";
 
 const quickLinks = [
   { to: "/admin/dashboard", label: "Dashboard" },
@@ -25,9 +26,23 @@ export default function AdminLayout() {
       <main className="admin-main">
         <header className="admin-topbar">
           <button type="button" className="admin-menu-button" onClick={() => setIsMenuOpen(true)}>Menu</button>
-          <div>
-            <strong>{user?.name || "Admin"}</strong>
-            <span>{user?.email || user?.phone}</span>
+          <div className="admin-topbar-title">
+            <span>Operations workspace</span>
+            <strong>Good day, {user?.name || "Admin"}</strong>
+          </div>
+          <label className="admin-topbar-search">
+            <Search size={16} />
+            <input placeholder="Search orders, customers, bookings" />
+          </label>
+          <button type="button" className="admin-notification-button" aria-label="Notifications">
+            <ReceiptText size={18} />
+          </button>
+          <div className="admin-topbar-profile">
+            <span><UserRound size={18} /></span>
+            <div>
+              <strong>{user?.name || "Admin"}</strong>
+              <small>{user?.email || user?.phone}</small>
+            </div>
           </div>
           <button type="button" onClick={logout}>Logout</button>
         </header>

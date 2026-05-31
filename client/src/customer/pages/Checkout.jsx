@@ -35,6 +35,7 @@ export default function Checkout() {
   const { isAuthenticated, user } = useAuth();
   const [errors, setErrors] = useState({});
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const paymentLockRef = useRef(false);
   const pendingRazorpayOrderRef = useRef(null);
   const [form, setForm] = useState({
@@ -84,6 +85,58 @@ export default function Checkout() {
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
+  };
+
+  const useCurrentLocation = () => {
+    setErrors((current) => ({ ...current, address: undefined }));
+
+    if (!window.isSecureContext) {
+      setErrors((current) => ({
+        ...current,
+        address: "Location access works only on HTTPS. Please open the deployed app link."
+      }));
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setErrors((current) => ({
+        ...current,
+        address: "This phone/browser does not support current location detection."
+      }));
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const lat = Number(coords.latitude).toFixed(6);
+        const lng = Number(coords.longitude).toFixed(6);
+        const mapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
+        const accuracy = Number.isFinite(coords.accuracy) ? ` Accuracy: ${Math.round(coords.accuracy)}m.` : "";
+
+        updateField("address", `Current location: ${mapsUrl} (${lat}, ${lng}).${accuracy}`);
+        setErrors((current) => ({ ...current, address: undefined }));
+        setIsDetectingLocation(false);
+      },
+      (error) => {
+        const messages = {
+          1: "Location permission was denied. Please allow location access and try again.",
+          2: "Your current location is unavailable. Please check GPS/network and try again.",
+          3: "Location detection timed out. Please try again or enter your address manually."
+        };
+
+        setErrors((current) => ({
+          ...current,
+          address: messages[error.code] || "Could not detect current location. Please enter your address manually."
+        }));
+        setIsDetectingLocation(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
   };
 
   const verifyRazorpayPayment = (providerOrder, order) => new Promise((resolve, reject) => {
@@ -270,7 +323,14 @@ export default function Checkout() {
               Landmark
               <input value={form.landmark} onChange={(event) => updateField("landmark", event.target.value)} />
             </label>
-            <button className="app-button outline full-width" type="button"><MapPin size={17} /> Use current location</button>
+            <button
+              className="app-button outline full-width"
+              type="button"
+              onClick={useCurrentLocation}
+              disabled={isDetectingLocation}
+            >
+              <MapPin size={17} /> {isDetectingLocation ? "Detecting location..." : "Use current location"}
+            </button>
           </>
         ) : (
           <div className="saved-address-card">

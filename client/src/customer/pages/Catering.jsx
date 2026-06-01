@@ -85,19 +85,28 @@ export default function Catering() {
         </div>
       </section>
 
-      <section className="app-section">
-        <h2>Package comparison</h2>
+      <section className="app-section package-comparison-section">
+        <div className="section-title-row">
+          <div>
+            <p>Choose package</p>
+            <h2>Package comparison</h2>
+          </div>
+          <span>{selectedPackage}</span>
+        </div>
         <div className="package-list">
           {cateringPackages.map((item) => (
-            <article className={`app-card package-card-app selectable ${selectedPackage === item.name ? "selected" : ""}`} key={item.name} onClick={() => setSelectedPackage(item.name)}>
-              <h3>{item.name}</h3>
-              <strong>{item.price}</strong>
+            <button className={`app-card package-card-app selectable ${selectedPackage === item.name ? "selected" : ""}`} key={item.name} type="button" onClick={() => setSelectedPackage(item.name)}>
+              <span>{selectedPackage === item.name ? "Selected" : "Tap to select"}</span>
+              <div>
+                <h3>{item.name}</h3>
+                <strong>{item.price}</strong>
+              </div>
               <ul>
                 {item.features.map((feature) => (
                   <li key={feature}><CheckCircle2 size={15} /> {feature}</li>
                 ))}
               </ul>
-            </article>
+            </button>
           ))}
         </div>
       </section>

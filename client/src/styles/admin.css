@@ -354,6 +354,12 @@ td small {
   padding: clamp(20px, 3vw, 32px);
 }
 
+.admin-page-head > *,
+.admin-hero-panel > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
 .admin-page-head h1,
 .admin-hero-panel h1 {
   margin: 6px 0 8px;
@@ -1133,6 +1139,11 @@ td:last-child {
     padding: 18px;
   }
 
+  .admin-page-head > div,
+  .admin-hero-panel > div {
+    width: 100%;
+  }
+
   .admin-page-head h1,
   .admin-hero-panel h1 {
     font-size: clamp(23px, 7vw, 30px);
@@ -1142,6 +1153,8 @@ td:last-child {
   .admin-page-head p,
   .admin-hero-panel p {
     font-size: 14px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
   .admin-eyebrow {
@@ -1270,11 +1283,25 @@ td:last-child {
   }
 
   .admin-actions a,
+  .admin-actions button,
+  .admin-actions .admin-primary,
   .admin-inline-fields button,
   .admin-inline-fields select,
   .admin-inline-fields input,
   .admin-filter-chips button {
     width: 100%;
+  }
+
+  .admin-actions a,
+  .admin-actions button,
+  .admin-actions .admin-primary {
+    min-width: 0;
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+    line-height: 1.2;
+    text-align: center;
+    white-space: normal;
   }
 
   .admin-row-actions {
@@ -1426,8 +1453,12 @@ td:last-child {
   }
 
   .admin-menu-button::before {
-    content: "Menu";
-    font-size: 12px;
+    content: "";
+    width: 16px;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor;
   }
 
   .admin-notification-button svg,

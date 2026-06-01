@@ -62,6 +62,7 @@ body {
   color: #17312d;
   font-size: 13px;
   font-weight: 800;
+  max-width: calc(100vw - 24px);
   padding: 12px;
 }
 
@@ -72,15 +73,20 @@ body {
 }
 
 .pwa-status-banner button {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   min-height: 36px;
   border: 0;
   border-radius: 999px;
   background: #0f766e;
   color: #fff;
   cursor: pointer;
+  font-size: 12px;
   font-weight: 900;
-  padding: 0 14px;
+  overflow: hidden;
+  padding: 0 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pwa-status-banner span {
@@ -97,8 +103,9 @@ body {
 
 .pwa-status-actions {
   display: flex;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   gap: 8px;
+  min-width: 0;
 }
 
 .pwa-status-banner .pwa-secondary-action {
@@ -149,11 +156,31 @@ body {
   }
 
   .pwa-status-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
 
   .pwa-status-actions button {
-    flex: 1 1 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .pwa-status-banner {
+    left: 8px;
+    right: 8px;
+    max-width: calc(100vw - 16px);
+    padding: 10px;
+  }
+
+  .pwa-status-actions {
+    gap: 6px;
+  }
+
+  .pwa-status-banner button {
+    font-size: 11px;
+    padding-inline: 8px;
   }
 }
 

@@ -480,6 +480,8 @@ button[type="submit"],
 .admin-toolbar {
   flex-wrap: wrap;
   justify-content: space-between;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--admin-border);
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.84);
@@ -489,6 +491,7 @@ button[type="submit"],
 
 .admin-toolbar > * {
   flex: 1 1 220px;
+  min-width: 0;
 }
 
 .admin-filter-chips {
@@ -496,6 +499,8 @@ button[type="submit"],
   flex: 2 1 420px;
   flex-wrap: wrap;
   gap: 8px;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .admin-form-grid {
@@ -1272,10 +1277,14 @@ td:last-child {
   .admin-toolbar {
     align-items: stretch;
     flex-direction: column;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .admin-toolbar > * {
     flex: 0 0 auto;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .admin-toolbar .admin-search-input {
@@ -1287,8 +1296,7 @@ td:last-child {
   .admin-actions .admin-primary,
   .admin-inline-fields button,
   .admin-inline-fields select,
-  .admin-inline-fields input,
-  .admin-filter-chips button {
+  .admin-inline-fields input {
     width: 100%;
   }
 
@@ -1326,9 +1334,13 @@ td:last-child {
     flex: 0 0 auto;
     flex-wrap: nowrap;
     gap: 8px;
+    max-width: 100%;
+    min-width: 0;
     width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
     padding-bottom: 4px;
+    overscroll-behavior-inline: contain;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -1341,6 +1353,7 @@ td:last-child {
     flex: 0 0 auto;
     width: auto;
     min-width: max-content;
+    max-width: max-content;
     min-height: 36px;
     padding: 0 12px;
     font-size: 12px;
@@ -1348,7 +1361,8 @@ td:last-child {
   }
 
   .admin-toolbar .admin-filter-chips {
-    margin-inline: -2px;
+    margin-inline: 0;
+    max-width: 100%;
     width: 100%;
   }
 
@@ -1450,6 +1464,17 @@ td:last-child {
     min-height: 38px;
     padding: 0;
     font-size: 0;
+  }
+
+  .admin-menu-button {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .admin-menu-button:hover {
+    box-shadow: none;
+    transform: none;
   }
 
   .admin-menu-button::before {

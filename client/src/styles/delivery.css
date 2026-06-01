@@ -1366,3 +1366,131 @@
     font-size: 11px;
   }
 }
+
+/* Client-ready delivery polish */
+.delivery-app {
+  --delivery-bg: #f8fafc;
+  --delivery-card: #ffffff;
+  --delivery-ink: #18181b;
+  --delivery-muted: #71717a;
+  --delivery-line: #e5e7eb;
+  --delivery-accent: #0f766e;
+  --delivery-accent-dark: #0f766e;
+  --delivery-dark: #111827;
+}
+
+.delivery-app {
+  background:
+    linear-gradient(180deg, #f8fafc 0%, #fbfaf7 48%, #effaf7 100%);
+}
+
+.delivery-header {
+  border-color: rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+}
+
+.delivery-header h1,
+.delivery-page-title h1,
+.delivery-section-head h2,
+.delivery-detail-card h2,
+.delivery-order-hero h1 {
+  color: #111827;
+  letter-spacing: 0;
+}
+
+.delivery-header span,
+.delivery-page-title span,
+.delivery-section-head span {
+  color: #0f766e;
+}
+
+.delivery-hero-card,
+.delivery-page-title,
+.delivery-detail-card,
+.delivery-order-card,
+.delivery-profile-card,
+.delivery-state,
+.delivery-tracking-card,
+.delivery-address-card {
+  border-color: rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 16px 42px rgba(15, 23, 42, 0.08);
+}
+
+.delivery-page-title,
+.delivery-dashboard-title {
+  background:
+    linear-gradient(135deg, #ffffff, #ecfdf5 58%, #fff7ed);
+}
+
+.delivery-stat-card {
+  border-color: rgba(226, 232, 240, 0.95);
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.07);
+}
+
+.delivery-stat-icon {
+  background: linear-gradient(135deg, #ecfdf5, #ccfbf1);
+  color: #0f766e;
+}
+
+.delivery-stat-card strong {
+  color: #111827;
+}
+
+.delivery-card-actions a,
+.delivery-action-grid a,
+.delivery-back-link,
+.delivery-primary-button,
+.delivery-status-actions button,
+.delivery-login-card button,
+.delivery-toast button,
+.delivery-modal button,
+.delivery-tracking-actions button,
+.delivery-tracking-actions a {
+  border-radius: 14px;
+  background: linear-gradient(135deg, #111827, #263244);
+  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.14);
+}
+
+.delivery-card-actions a:nth-of-type(1),
+.delivery-action-grid a:nth-child(3),
+.delivery-tracking-actions a,
+.delivery-tracking-actions .start,
+.delivery-status-actions button:nth-child(1),
+.delivery-status-actions button:nth-child(2) {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+}
+
+.delivery-bottom-nav {
+  border-color: rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 -12px 34px rgba(15, 23, 42, 0.08);
+}
+
+.delivery-bottom-nav a.active {
+  background: #111827;
+  color: #ffffff;
+}
+
+@media (max-width: 520px) {
+  .delivery-dashboard-page .delivery-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .delivery-dashboard-page .delivery-stat-card {
+    min-height: 90px;
+    padding: 10px;
+  }
+
+  .delivery-dashboard-page .delivery-stat-card strong {
+    font-size: 23px;
+  }
+}
+
+@media (max-width: 360px) {
+  .delivery-dashboard-page .delivery-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

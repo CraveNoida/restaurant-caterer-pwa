@@ -1,4 +1,4 @@
-const CACHE_NAME = "ahmad-caterers-pwa-v12";
+const CACHE_NAME = "ahmad-caterers-pwa-v13";
 const OFFLINE_URL = "/offline.html";
 const APP_SHELL_URL = "/index.html";
 const PRECACHE_URLS = [
@@ -24,6 +24,10 @@ const PRECACHE_URLS = [
 ];
 function isApiOrRealtimeRequest(url) {
   return url.pathname.startsWith("/api") || url.pathname.startsWith("/socket.io");
+}
+
+function isBuildAssetRequest(url) {
+  return url.origin === self.location.origin && url.pathname.startsWith("/assets/");
 }
 
 self.addEventListener("install", (event) => {
@@ -62,6 +66,21 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.origin !== self.location.origin) return;
+
+  if (isBuildAssetRequest(url)) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cached) => {

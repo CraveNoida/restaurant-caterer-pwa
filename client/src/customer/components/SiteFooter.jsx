@@ -38,7 +38,7 @@ export default function SiteFooter() {
           </div>
         </div>
       </div>
-      <div className="footer-bottom">Ahmad Caterers customer app placeholder.</div>
+      <div className="footer-bottom">Ahmad Caterers restaurant and catering service.</div>
     </footer>
   );
 }

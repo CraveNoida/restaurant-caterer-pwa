@@ -97,9 +97,9 @@ export default function CateringBookings() {
           ]} />
           <section className="admin-card slim">
             <strong>Special requirements</strong>
-            <p>{selected.specialRequirements || "N/A"}</p>
+            <p>{selected.specialRequirements || "Not provided"}</p>
             <strong>Admin notes</strong>
-            <p>{selected.adminNotes || "N/A"}</p>
+            <p>{selected.adminNotes || "No notes added"}</p>
           </section>
           <div className="admin-inline-fields">
             <select value={selected.bookingStatus} onChange={(event) => updateStatus(selected, event.target.value)}>{bookingStatuses.map((item) => <option key={item} value={item}>{item}</option>)}</select>

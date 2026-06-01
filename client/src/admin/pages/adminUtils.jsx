@@ -19,7 +19,7 @@ export function money(value) {
 }
 
 export function dateTime(value) {
-  return value ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "N/A";
+  return value ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "Not available";
 }
 
 export function todayKey(value) {

@@ -71,7 +71,7 @@ export default function Profile() {
         <Star size={58} />
         <div>
           <h2>Ahmad Priority</h2>
-          <p>Future loyalty placeholder for repeat food orders and catering customers.</p>
+          <p>Priority support for repeat food orders, event menus, and catering bookings.</p>
         </div>
       </section>
 

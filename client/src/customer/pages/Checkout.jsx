@@ -264,7 +264,7 @@ export default function Checkout() {
             <label>
               House / Flat / Floor
               <input
-                placeholder="Example: Flat 204, 2nd floor"
+                placeholder="Flat, floor, nearby detail"
                 value={form.houseDetails}
                 onChange={(event) => updateField("houseDetails", event.target.value)}
               />

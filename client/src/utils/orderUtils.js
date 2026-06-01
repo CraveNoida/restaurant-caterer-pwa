@@ -177,11 +177,11 @@ export function formatOrderWhatsAppMessage(order, formatCurrency) {
   return [
     "Hi Ahmad Caterers, please confirm my order.",
     `Order ID: ${normalized.orderId}`,
-    `Name: ${normalized.customerName || "N/A"}`,
-    `Phone: ${normalized.phone || "N/A"}`,
+    `Name: ${normalized.customerName || "Not provided"}`,
+    `Phone: ${normalized.phone || "Not provided"}`,
     normalized.orderType === "pickup"
       ? "Order type: Pickup"
-      : `Address: ${normalized.houseDetails ? `${normalized.houseDetails}, ` : ""}${normalized.address || "N/A"}${normalized.landmark ? `, Landmark: ${normalized.landmark}` : ""}`,
+      : `Address: ${normalized.houseDetails ? `${normalized.houseDetails}, ` : ""}${normalized.address || "Not provided"}${normalized.landmark ? `, Landmark: ${normalized.landmark}` : ""}`,
     `Items:\n${formatOrderItems(normalized.items, formatCurrency)}`,
     `Total: ${formatCurrency(normalized.totalAmount)}`,
     `Payment: ${normalized.paymentMethod}`,
@@ -196,15 +196,15 @@ export function generateWhatsAppCateringMessage(booking) {
 
   return [
     "Hi Ahmad Caterers, I want to enquire about catering.",
-    `Name: ${booking.name || booking.customerName || "N/A"}`,
-    `Phone: ${booking.mobile || booking.phone || "N/A"}`,
+    `Name: ${booking.name || booking.customerName || "Not provided"}`,
+    `Phone: ${booking.mobile || booking.phone || "Not provided"}`,
     booking.email ? `Email: ${booking.email}` : "",
-    `Event type: ${booking.eventType || "N/A"}`,
-    `Date: ${booking.eventDate || booking.date || "N/A"}`,
-    `Time: ${booking.eventTime || booking.time || "N/A"}`,
-    `Venue: ${booking.venue || booking.location || "N/A"}`,
-    `Guest count: ${booking.guests || booking.guestCount || "N/A"}`,
-    `Food preference: ${booking.foodPreference || "N/A"}`,
+    `Event type: ${booking.eventType || "Not provided"}`,
+    `Date: ${booking.eventDate || booking.date || "Not provided"}`,
+    `Time: ${booking.eventTime || booking.time || "Not provided"}`,
+    `Venue: ${booking.venue || booking.location || "Not provided"}`,
+    `Guest count: ${booking.guests || booking.guestCount || "Not provided"}`,
+    `Food preference: ${booking.foodPreference || "Not provided"}`,
     booking.selectedPackage ? `Package: ${booking.selectedPackage}` : "",
     booking.selectedDishes?.length ? `Selected dishes: ${booking.selectedDishes.join(", ")}` : "",
     booking.budget ? `Budget: ${booking.budget}` : "",

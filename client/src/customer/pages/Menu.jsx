@@ -125,7 +125,7 @@ export default function Menu() {
           <div className="app-card empty-order-tab">
             <Utensils size={34} />
             <h2>No menu items available</h2>
-            <p>Add menu items from admin later.</p>
+            <p>Please check back shortly or contact the restaurant for today&apos;s menu.</p>
           </div>
         )}
       </section>

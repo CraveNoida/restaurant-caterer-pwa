@@ -26,11 +26,11 @@ export default function Payments() {
       ...(data.payments || []).map((payment) => ({
         id: payment._id,
         reference: payment.orderId || payment.bookingId || payment._id,
-        customer: payment.customerId?.name || payment.customerId?.phone || "N/A",
+        customer: payment.customerId?.name || payment.customerId?.phone || "Customer not linked",
         type: payment.paymentMethod,
         amount: payment.amount,
         status: payment.paymentStatus,
-        transactionId: payment.transactionId || payment.razorpayPaymentId || payment.razorpayOrderId || "N/A",
+        transactionId: payment.transactionId || payment.razorpayPaymentId || payment.razorpayOrderId || "Not recorded",
         date: payment.createdAt,
         canMarkPaid: ["COD", "UPI"].includes(payment.paymentMethod) && payment.paymentStatus !== "paid"
       })),
@@ -43,7 +43,7 @@ export default function Payments() {
           type: order.paymentMethod,
           amount: order.totalAmount,
           status: order.paymentStatus,
-          transactionId: order.transactionId || "N/A",
+          transactionId: order.transactionId || "Not recorded",
           date: order.createdAt,
           canMarkPaid: false
         }))
@@ -74,7 +74,7 @@ export default function Payments() {
 
   const markPaid = async (row) => {
     try {
-      const data = await adminService.updatePaymentStatus(row.id, { paymentStatus: "paid", transactionId: row.transactionId === "N/A" ? "manual_admin_paid" : row.transactionId });
+      const data = await adminService.updatePaymentStatus(row.id, { paymentStatus: "paid", transactionId: row.transactionId === "Not recorded" ? "manual_admin_paid" : row.transactionId });
       setData((current) => ({
         ...current,
         payments: current.payments.map((payment) => payment._id === row.id ? data.payment : payment)

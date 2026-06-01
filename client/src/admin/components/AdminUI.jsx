@@ -88,7 +88,7 @@ export function InfoGrid({ items }) {
       {items.map(([label, value]) => (
         <span key={label}>
           <strong>{label}</strong>
-          {value ?? "N/A"}
+          {value ?? "Not provided"}
         </span>
       ))}
     </div>

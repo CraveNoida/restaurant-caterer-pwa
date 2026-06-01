@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { deliveryService } from "../../services/deliveryService.js";
 import DeliveryOrderCard from "../components/DeliveryOrderCard.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
-import { CheckCircle2, PackageCheck, ReceiptText, Truck } from "../../customer/components/icons.jsx";
+import { CheckCircle2, ReceiptText, Truck } from "../../customer/components/icons.jsx";
 
 export default function DeliveryDashboard() {
   const { user } = useAuth();
@@ -19,40 +20,36 @@ export default function DeliveryDashboard() {
 
   const stats = useMemo(() => ({
     assigned: orders.filter((order) => !["delivered", "cancelled"].includes(order.status)).length,
-    pickedUp: orders.filter((order) => order.deliveryStatus === "picked_up").length,
     onTheWay: orders.filter((order) => order.deliveryStatus === "on_the_way").length,
     deliveredToday: orders.filter((order) => (order.deliveryStatus === "delivered" || order.status === "delivered") && new Date(order.updatedAt || order.createdAt).toDateString() === new Date().toDateString()).length,
-    failed: orders.filter((order) => order.deliveryStatus === "failed_delivery" || order.status === "cancelled").length
   }), [orders]);
 
   const activeOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status));
+  const nextOrders = activeOrders.slice(0, 3);
 
   if (loading) return <section className="delivery-state">Loading dashboard...</section>;
   if (error) return <section className="delivery-state error">{error}</section>;
 
   return (
-    <section className="delivery-page">
-      <div className="delivery-hero-card">
+    <section className="delivery-page delivery-dashboard-page">
+      <div className="delivery-page-title delivery-dashboard-title">
         <div>
-          <span>Online delivery workspace</span>
+          <span>Delivery dashboard</span>
           <h1>Hi, {user?.name || "Partner"}</h1>
-          <p>Keep assigned orders moving with route, call, status, and live GPS controls close at hand.</p>
+          <p>Focus on active work, route status, and today&apos;s completed deliveries.</p>
         </div>
-        <b>Active</b>
       </div>
       <div className="delivery-stat-grid">
         <Stat label="Assigned" value={stats.assigned} icon={ReceiptText} />
-        <Stat label="Picked up" value={stats.pickedUp} icon={PackageCheck} />
         <Stat label="On the way" value={stats.onTheWay} icon={Truck} />
         <Stat label="Delivered today" value={stats.deliveredToday} icon={CheckCircle2} />
-        <Stat label="Failed" value={stats.failed} icon={ReceiptText} />
       </div>
       <div className="delivery-section-head">
-        <h2>Active Orders</h2>
-        <span>{activeOrders.length} assigned</span>
+        <h2>Next Orders</h2>
+        <Link to="/delivery/orders">View all {activeOrders.length}</Link>
       </div>
       <div className="delivery-list">
-        {activeOrders.length ? activeOrders.map((order) => <DeliveryOrderCard key={order.orderId} order={order} />) : <div className="delivery-state">No active assigned orders.</div>}
+        {nextOrders.length ? nextOrders.map((order) => <DeliveryOrderCard key={order.orderId} order={order} />) : <div className="delivery-state">No active assigned orders.</div>}
       </div>
     </section>
   );
